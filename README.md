@@ -14,4 +14,4 @@ Backend: The backend incorporates the Google Gemini Pro Vision API via the Googl
 The utilization of ChromeVox Classic screen reader, Cloud Function, and Google Gemini Pro Vision is prevalent. ChromeVox Classic is favored due to its comprehensive functionality and widespread acclaim. Cloud Function is employed owing to its adaptability, ready-to-use environment, superior scalability, and cost-effectiveness. Lastly, Gemini Pro Vision is chosen due to its prowess as the most potent AI model capable of describing an image in a split second, API-based, and its low usage cost.
 
 
-# This project has been submmit to Google Developer Student Clubs Solution Challenge 2024 from [GDCS-HKIIT (Formerly GDSC-IVE)](https://duckduckgo.com](https://gdsc.community.dev/hong-kong-institute-of-vocational-education/)https://gdsc.community.dev/hong-kong-institute-of-vocational-education/).
+# Google Developer Student Clubs Solution Challenge 2024 Submission by [GDCS-HKIIT (Formerly GDSC-IVE)](https://duckduckgo.com](https://gdsc.community.dev/hong-kong-institute-of-vocational-education/)https://gdsc.community.dev/hong-kong-institute-of-vocational-education/).
