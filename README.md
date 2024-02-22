@@ -13,5 +13,19 @@ Backend: The backend incorporates the Google Gemini Pro Vision API via the Googl
 
 The utilization of ChromeVox Classic screen reader, Cloud Function, and Google Gemini Pro Vision is prevalent. ChromeVox Classic is favored due to its comprehensive functionality and widespread acclaim. Cloud Function is employed owing to its adaptability, ready-to-use environment, superior scalability, and cost-effectiveness. Lastly, Gemini Pro Vision is chosen due to its prowess as the most potent AI model capable of describing an image in a split second, API-based, and its low usage cost.
 
+## Setup procedure
+
+Frontend:
+1. Follow [original instruction](https://source.chromium.org/chromium/chromium/src/+/main:docs/windows_build_instructions.md) to checkout and build ChromeVox Classic
+2. Copy and replace all sources under [chromevoxclassic/](chromevoxclassic) to the chromium source under the path ui/accessibility/extensions/chromevoxclassic/
+3. After building the ChromeVox Classic browser extension, install the extension under Chrome browser with developer mode turned on
+4. Install with "Load unpacked"; the language of generated image description can be configured from the manifest.json by setting the lang code to the attribute "tts_locale", please refer [here](https://cloud.google.com/translate/docs/languages) for supported language codes
+5. The cloud function URL can be configured via the attribute "gemini_api" from the manifest.json
+6. Reinstall the browser extension after modifying the manifest.json
+
+Backend: 
+1. Create a new Google Cloud Function, with settings: 2nd gen, memory >= 512 MB, and allow all traffic
+2. Copy and replace all sources under [google_cloudfunction/](google_cloudfunction) to your Cloud Function 
+
 
 # Google Developer Student Clubs Solution Challenge 2024 Submission by [GDCS-HKIIT (Formerly GDSC-IVE)](https://duckduckgo.com](https://gdsc.community.dev/hong-kong-institute-of-vocational-education/)https://gdsc.community.dev/hong-kong-institute-of-vocational-education/).
