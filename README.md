@@ -3,7 +3,7 @@ Experience the magic of Gemini Pro Vision AI Screen Reader in this thrilling vid
 
 The problem being addressed is the inability of visually impaired individuals to access image information due to the lack of adherence to W3C web accessibility initiatives by websites. Currently, over 80% of websites lack meaningful alternate text for their images. Moreover, it is unfeasible to retroactively add descriptive text to all existing websites manually.
 
-[![Gemini Pro Vision AI Screen Reader for visually impaired - GDSC Solution Challenge 2024](https://img.youtube.com/vi/Wc9yr4fOOIc/0.jpg)](https://www.youtube.com/watch?v=Wc9yr4fOOIc)
+[![Gemini Pro Vision AI Screen Reader for visually impaired - GDSC Solution Challenge 2024](https://img.youtube.com/vi/SUkg_76mF6M/0.jpg)](https://www.youtube.com/watch?v=SUkg_76mF6M)
 
 ## Architecture 
 
