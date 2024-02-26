@@ -15,7 +15,7 @@ import { DatastoreConstruct } from "./components/datastore-construct";
 import { GoogleProjectIamMember } from "./.gen/providers/google-beta/google-project-iam-member";
 dotenv.config();
 
-class PyTestRunnerStack extends TerraformStack {
+class GeminiReaderRunnerStack extends TerraformStack {
   constructor(scope: Construct, id: string) {
     super(scope, id);
 
@@ -61,8 +61,8 @@ class PyTestRunnerStack extends TerraformStack {
       makePublic: false,
       cloudFunctionDeploymentConstruct: cloudFunctionDeploymentConstruct, 
       environmentVariables: {
-        "PROJECT_ID": project.projectId,
-        "REGION": "us-central1",
+        "MODEL_NAME": process.env.MODEL_NAME!,
+        "MODEL_REGION": process.env.MODEL_REGION!,
       },     
     });    
 
@@ -101,7 +101,7 @@ class PyTestRunnerStack extends TerraformStack {
 }
 
 async function buildStack(scope: Construct, id: string) {
-  const stack = new PyTestRunnerStack(scope, id);
+  const stack = new GeminiReaderRunnerStack(scope, id);
   await stack.buildGcpLabEngineStack();
 }
 
