@@ -8,7 +8,7 @@ from vertexai.preview.generative_models import GenerativeModel, Part
 from google.cloud import translate
 
 @functions_framework.http
-def gemini_img_desc(request):
+def geminiimgdesc(request):
     """HTTP Cloud Function.
     Args:
         request (flask.Request): The request object.

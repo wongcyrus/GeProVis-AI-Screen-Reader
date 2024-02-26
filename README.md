@@ -15,7 +15,7 @@ The utilization of ChromeVox Classic screen reader, Cloud Function, and Google G
 
 ## Setup procedure
 
-Frontend:
+### Frontend:
 1. Follow [original instruction](https://source.chromium.org/chromium/chromium/src/+/main:docs/windows_build_instructions.md) to checkout and build ChromeVox Classic
 2. Copy and replace all sources under [chromevoxclassic/](chromevoxclassic) to the chromium source under the path ui/accessibility/extensions/chromevoxclassic/
 3. After building the ChromeVox Classic browser extension, install the extension under Chrome browser with developer mode turned on
@@ -23,9 +23,44 @@ Frontend:
 5. The cloud function URL can be configured via the attribute "gemini_api" from the manifest.json
 6. Reinstall the browser extension after modifying the manifest.json
 
-Backend: 
+### Backend: 
+#### Manual
 1. Create a new Google Cloud Function, with settings: 2nd gen, memory >= 512 MB, and allow all traffic
 2. Copy and replace all sources under [google_cloudfunction/](google_cloudfunction) to your Cloud Function 
+
+#### Production Deplolyment
+It includes API Gateway and implements rate limit for each API Key. Fork this repo and create a Codespace.
+
+##### Login your GCP account
+```
+gcloud auth application-default login
+```
+
+##### Create GCP resources
+```
+./deploy.sh 
+```
+Record down the output api-url, project-id, and service-name.
+
+##### Enable the API
+Set project
+```
+gcloud auth login
+gcloud config set project <project-id>
+gcloud auth application-default set-quota-project <project-id>
+gcloud services enable <service-name>
+```
+
+#### Admin Tools
+A set of Python scripts for API key management. Rename Namelist_template.xlsx to Namelist.xlsx, add 
+
+###### Before using admin tools
+
+```
+gcloud auth login
+gcloud config set project <project-id>
+gcloud auth application-default set-quota-project <project-id>
+```
 
 
 # Google Developer Student Clubs Solution Challenge 2024 Submission by [GDCS-HKIIT (Formerly GDSC-IVE)](https://duckduckgo.com](https://gdsc.community.dev/hong-kong-institute-of-vocational-education/)https://gdsc.community.dev/hong-kong-institute-of-vocational-education/).

@@ -1,0 +1,69 @@
+# Source Reference
+# https://beranger.medium.com/rate-limit-google-cloud-functions-with-api-gateway-19b54bb9d9e9
+swagger: '2.0'
+info:
+  title: api-gateway
+  description: API Gateway
+  version: 1.0.0
+schemes:
+  - https
+produces:
+  - application/json
+x-google-management:
+  metrics:
+    - name: gemini-smoothies-request
+      displayName: gemini smoothie quota
+      valueType: INT64
+      metricKind: DELTA
+  quota:
+    limits:
+      - name: gemini-smoothie-limit
+        metric: gemini-smoothies-request
+        unit: 1/min/{project}
+        values:
+          STANDARD: 500
+
+paths:
+  /gemini:
+    get:
+      summary: Run Gemini (GET)
+      operationId: gemini-get-v1
+      security:
+        - api_key: []
+      x-google-quota:
+        metricCosts:
+          gemini-smoothies-request: 1
+      x-google-backend:
+        address: ${GEMINI}
+        deadline: 300.0
+      consumes:
+        - application/json
+      produces:
+        - application/json        
+      responses:
+        '200':
+          description: OK
+    post:
+      summary: Run Gemini (POST)
+      operationId: gemini-post-v1
+      security:
+        - api_key: []
+      x-google-quota:
+        metricCosts:
+          gemini-smoothies-request: 1
+      x-google-backend:
+        address: ${GEMINI}
+        deadline: 300.0
+      consumes:
+        - application/json
+      produces:
+        - application/json        
+      responses:
+        '200':
+          description: OK
+
+securityDefinitions:
+  api_key:
+    type: apiKey
+    name: key
+    in: query
