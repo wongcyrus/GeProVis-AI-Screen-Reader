@@ -4,6 +4,7 @@ import functions_framework
 import base64
 import magic
 from urllib.request import urlopen
+import hashlib
 import vertexai
 # from vertexai.vision_models import ImageTextModel, Image
 from vertexai.preview.generative_models import GenerativeModel, Part
@@ -15,14 +16,14 @@ def get_user_id_by_api_key(key: str) -> str:
     user = client.get(client.key('ApiKey', key))
     return str(user['user_id'])
 
-def get_image_caption(url: str, lang: str):
+def get_image_caption(hash: str, lang: str):
     client = datastore.Client(project=os.environ.get('GCP_PROJECT'))
-    caption = client.get(client.key('Caption',url +"->"+ lang))
+    caption = client.get(client.key('Caption',hash +"->"+ lang))
     return caption
 
-def save_image_caption(url: str, caption: str,lang: str) -> bool:
+def save_image_caption(hash: str, url: str, caption: str,lang: str) -> bool:
     client = datastore.Client(project=os.environ.get('GCP_PROJECT'))
-    key = client.key('Caption', url +"->"+ lang)
+    key = client.key('Caption', hash +"->"+ lang)
     
     entity = datastore.Entity(key=key)
     entity.update({
@@ -68,8 +69,7 @@ def geminiimgdesc(request):
     user_id = get_user_id_by_api_key(key)
     print(f"user_id: {user_id}")
    
-
-
+    DEFAULT_LANG = 'en-US'
     def get_value(key, default=None):
         if request_json and key in request_json:
             return request_json[key]
@@ -85,18 +85,25 @@ def geminiimgdesc(request):
     if url:
         b64ImgData = base64.b64encode(urlopen(url).read())
         imgData = base64.decodebytes(b64ImgData)
-    if img:
+      
+    if img:       
         imgData = base64.decodebytes(img.encode('utf-8'))
-    # source_image = Image(image_bytes=imgData)
+
+    hash_object = hashlib.sha256(imgData)
+    hash = hash_object.hexdigest()
+
+    capture = get_image_caption(hash, lang)
+    if capture:
+        print("From Datastore:" + capture['caption'])
+        return ([capture['caption']], 200, headers)
+
     mime_type = magic.from_buffer(imgData, mime=True)
     source_image = Part.from_data(imgData, mime_type=mime_type)
     
-
     # constants to use in this function
     PROJECT_ID = os.environ.get('GCP_PROJECT')
     REGION = os.environ.get('MODEL_REGION')
     MODEL_NAME = os.environ.get('MODEL_NAME')
-    DEFAULT_LANG = 'en-US'
 
     vertexai.init(project=PROJECT_ID, location=REGION)
     model = GenerativeModel(MODEL_NAME)
@@ -134,5 +141,6 @@ def geminiimgdesc(request):
             ret_text += u"{}".format(translation.translated_text)
         #     speech_text = u"{}".format(translation.translated_text)
         #     break
+    save_image_caption(hash, url, ret_text, lang)
     
     return ([ret_text], 200, headers)
