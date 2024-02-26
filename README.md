@@ -44,26 +44,29 @@ gcloud auth application-default login
 Record down the output api-url, project-id, and service-name.
 
 ##### Enable the API
-Set project
+
 ```
 gcloud auth login
 gcloud config set project <project-id>
 gcloud auth application-default set-quota-project <project-id>
 gcloud services enable <service-name>
 ```
+If you omit to enable API, you will get "PERMISSION_DENIED: API xxxx.apigateway.gemini-screen-reader.cloud.goog is not enabled for the project.".
 
 #### Admin Tools
-A set of Python scripts for API key management. 
-1. Rename Namelist_template.xlsx to Namelist.xlsx, add user to the excel.
-2. Update admin_tools/config.py.
-
+A set of Python scripts for API key management in admin_tools folder.
 
 ###### Before using admin tools
 ```
 gcloud auth login
-gcloud config set project <project-id>
-gcloud auth application-default set-quota-project <project-id>
+gcloud config set project gemini-screen-reader
+gcloud auth application-default set-quota-project gemini-screen-reader
 ```
+
+1. Rename Namelist_template.xlsx to Namelist.xlsx, add maximum 500 users to the excel.
+2. Update admin_tools/config.py.
+4. run ```./setup.sh```
+3. run ```source venv/bin/activate```
 
 
 # Google Developer Student Clubs Solution Challenge 2024 Submission by [GDCS-HKIIT (Formerly GDSC-IVE)](https://gdsc.community.dev/hong-kong-institute-of-vocational-education/).

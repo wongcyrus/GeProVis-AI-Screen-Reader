@@ -43,7 +43,7 @@ def geminiimgdesc(request):
 
     vertexai.init(project=PROJECT_ID, location=PROJECT_LOC)
     # model = ImageTextModel.from_pretrained("imagetext@001")
-    model = GenerativeModel("gemini-pro-vision")
+    model = GenerativeModel("gemini-1.0-pro-vision-001")
 
     if request_json and 'img' in request_json:
         img = request_json['img']

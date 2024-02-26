@@ -1,3 +1,4 @@
+import os
 import functions_framework
 import base64
 import magic
@@ -37,13 +38,12 @@ def geminiimgdesc(request):
     request_args = request.args
 
     # constants to use in this function
-    PROJECT_ID = 'testproject-401009'
-    PROJECT_LOC = 'us-central1'
+    PROJECT_ID = os.environ.get('PROJECT_ID')
+    REGION = os.environ.get('REGION')
     DEFAULT_LANG = 'en-US'
 
-    vertexai.init(project=PROJECT_ID, location=PROJECT_LOC)
-    # model = ImageTextModel.from_pretrained("imagetext@001")
-    model = GenerativeModel("gemini-pro-vision")
+    vertexai.init(project=PROJECT_ID, location=REGION)
+    model = GenerativeModel("gemini-1.0-pro-vision-001")
 
     if request_json and 'img' in request_json:
         img = request_json['img']
@@ -110,7 +110,7 @@ def geminiimgdesc(request):
         translatedText = client.translate_text(
             contents= [speech_text],
             target_language_code=lang,
-            parent=f"projects/{PROJECT_ID}/locations/{PROJECT_LOC}",
+            parent=f"projects/{PROJECT_ID}/locations/{REGION}",
             source_language_code="en-US"
         )
         # speechText = translatedText.translated_text

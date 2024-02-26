@@ -59,7 +59,11 @@ class PyTestRunnerStack extends TerraformStack {
       timeout: 600,
       availableMemory: "512Mi",
       makePublic: false,
-      cloudFunctionDeploymentConstruct: cloudFunctionDeploymentConstruct,      
+      cloudFunctionDeploymentConstruct: cloudFunctionDeploymentConstruct, 
+      environmentVariables: {
+        "PROJECT_ID": project.projectId,
+        "REGION": "us-central1",
+      },     
     });    
 
     await DatastoreConstruct.create(this, " geminiImgDescDatastore", {
