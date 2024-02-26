@@ -25,6 +25,7 @@ The utilization of ChromeVox Classic screen reader, Cloud Function, and Google G
 
 ### Backend: 
 #### Manual
+This is quick R&D without authenication and rate limit. 
 1. Create a new Google Cloud Function, with settings: 2nd gen, memory >= 512 MB, and allow all traffic
 2. Copy and replace all sources under [google_cloudfunction/](google_cloudfunction) to your Cloud Function 
 
@@ -52,10 +53,12 @@ gcloud services enable <service-name>
 ```
 
 #### Admin Tools
-A set of Python scripts for API key management. Rename Namelist_template.xlsx to Namelist.xlsx, add 
+A set of Python scripts for API key management. 
+1. Rename Namelist_template.xlsx to Namelist.xlsx, add user to the excel.
+2. Update admin_tools/config.py.
+
 
 ###### Before using admin tools
-
 ```
 gcloud auth login
 gcloud config set project <project-id>
@@ -63,4 +66,4 @@ gcloud auth application-default set-quota-project <project-id>
 ```
 
 
-# Google Developer Student Clubs Solution Challenge 2024 Submission by [GDCS-HKIIT (Formerly GDSC-IVE)](https://duckduckgo.com](https://gdsc.community.dev/hong-kong-institute-of-vocational-education/)https://gdsc.community.dev/hong-kong-institute-of-vocational-education/).
+# Google Developer Student Clubs Solution Challenge 2024 Submission by [GDCS-HKIIT (Formerly GDSC-IVE)](https://gdsc.community.dev/hong-kong-institute-of-vocational-education/).
