@@ -3,6 +3,8 @@ import { App, TerraformOutput, TerraformStack } from "cdktf";
 import { ArchiveProvider } from "./.gen/providers/archive/provider";
 import { RandomProvider } from "./.gen/providers/random/provider";
 import { DataGoogleBillingAccount } from "./.gen/providers/google-beta/data-google-billing-account";
+import { GoogleDatastoreIndex } from "./.gen/providers/google-beta/google-datastore-index";
+
 
 import { GoogleBetaProvider } from "./.gen/providers/google-beta/provider/index";
 import { GoogleProject } from "./.gen/providers/google-beta/google-project";
@@ -59,17 +61,32 @@ class GeminiReaderRunnerStack extends TerraformStack {
       timeout: 600,
       availableMemory: "512Mi",
       makePublic: false,
-      cloudFunctionDeploymentConstruct: cloudFunctionDeploymentConstruct, 
+      cloudFunctionDeploymentConstruct: cloudFunctionDeploymentConstruct,
       environmentVariables: {
         "MODEL_NAME": process.env.MODEL_NAME!,
         "MODEL_REGION": process.env.MODEL_REGION!,
-      },     
-    });    
+      },
+    });
 
     await DatastoreConstruct.create(this, " geminiImgDescDatastore", {
       project: project.projectId,
       servicesAccount: geminiImgDescCloudFunctionConstruct.serviceAccount,
-    });    
+    });
+
+    new GoogleDatastoreIndex(this, "google_datastore_index", {
+      project: project.projectId,
+      kind: "Usage",
+      properties: [
+        {
+          name: "user_id",
+          direction: "ASCENDING",
+        },
+        {
+          name: "time",
+          direction: "DESCENDING",
+        },
+      ],
+    });
 
     new GoogleProjectIamMember(this, "AiplatformProjectIamMember", {
       project: project.id,

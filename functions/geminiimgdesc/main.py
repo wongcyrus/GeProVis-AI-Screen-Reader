@@ -7,9 +7,7 @@ from urllib.request import urlopen
 import hashlib
 import vertexai
 
-# from vertexai.vision_models import ImageTextModel, Image
 from vertexai.preview.generative_models import GenerativeModel, Part
-from google.cloud import translate
 from google.cloud import datastore
 
 
@@ -26,12 +24,41 @@ def get_image_caption(hash: str, lang: str):
 
 
 def save_image_caption(
-    hash: str, url: str, caption: str, lang: str, time: datetime
+    hash: str, url: str, caption: str, lang: str, now: datetime
 ) -> bool:
     client = datastore.Client(project=os.environ.get("GCP_PROJECT"))
     key = client.key("Caption", hash + "->" + lang)
     entity = datastore.Entity(key=key)
-    entity.update({"url": url, "caption": caption, "lang": lang, "time": time})
+    entity.update({"url": url, "caption": caption, "lang": lang, "time": now})
+    client.put(entity)
+
+
+def save_usage(
+    user_id: str,
+    hash: str,
+    text_input: str,
+    text_output: str,
+    now: datetime,
+) -> bool:
+    client = datastore.Client(project=os.environ.get("GCP_PROJECT"))
+    key = client.key("Usage", user_id + "->" + hash)
+    entity = datastore.Entity(key=key)
+
+    # https://cloud.google.com/vertex-ai/docs/generative-ai/pricing
+    # 1 image + Text Input + Text Output
+    cost = (
+        0.0025 + 0.000125 * len(text_input) / 1000 + 0.000375 * len(text_output) / 1000
+    )
+
+    entity.update(
+        {
+            "user_id": user_id,
+            "text_input": text_input,
+            "text_output": text_output,
+            "cost": cost,
+            "time": now,
+        }
+    )
     client.put(entity)
 
 
@@ -109,10 +136,11 @@ def geminiimgdesc(request):
 
     vertexai.init(project=PROJECT_ID, location=REGION)
     model = GenerativeModel(MODEL_NAME)
+    prompt = f"""Describes the image in less than 40 words in {lang}."""
     responses = model.generate_content(
         [
             source_image,
-            """Exactly not more than 40 words, describe what is the image about.""",
+            prompt,
         ],
         generation_config={
             "max_output_tokens": 40,  # 30 words
@@ -135,21 +163,9 @@ def geminiimgdesc(request):
 
     print(speech_text)
     ret_text = speech_text
-    if lang != "en-US":
-        client = translate.TranslationServiceClient()
-        translatedText = client.translate_text(
-            contents=[speech_text],
-            target_language_code=lang,
-            parent=f"projects/{PROJECT_ID}/locations/{REGION}",
-            source_language_code="en-US",
-        )
-        # speechText = translatedText.translated_text
-        ret_text = ""
-        for translation in translatedText.translations:
-            ret_text += "{}".format(translation.translated_text)
-        #     speech_text = u"{}".format(translation.translated_text)
-        #     break
-    now = datetime.datetime.now()        
+
+    now = datetime.datetime.now()
     save_image_caption(hash, url, ret_text, lang, now)
+    save_usage(user_id, hash, prompt, ret_text, now)
 
     return ([ret_text], 200, headers)
