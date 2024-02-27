@@ -29,7 +29,8 @@ paths:
       summary: Run Gemini (GET)
       operationId: gemini-get-v1
       security:
-        - api_key: []
+        - api_key_query: []
+        - api_key_header: []
       x-google-quota:
         metricCosts:
           gemini-smoothies-request: 1
@@ -47,7 +48,8 @@ paths:
       summary: Run Gemini (POST)
       operationId: gemini-post-v1
       security:
-        - api_key: []
+        - api_key_query: []
+        - api_key_header: []
       x-google-quota:
         metricCosts:
           gemini-smoothies-request: 1
@@ -63,7 +65,11 @@ paths:
           description: OK
 
 securityDefinitions:
-  api_key:
+  api_key_query:
     type: apiKey
     name: key
     in: query
+  api_key_header:
+    type: apiKey
+    in: header
+    name: X-API-Key

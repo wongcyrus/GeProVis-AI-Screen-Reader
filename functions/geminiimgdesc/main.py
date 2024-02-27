@@ -91,7 +91,9 @@ def geminiimgdesc(request):
     request_json = request.get_json(silent=True)
     request_args = request.args
 
-    key = request_args["key"]
+    key = request.headers.get("X-API-Key")
+    if not key:
+        key = request_args["key"]
     print(f"key: {key}")
 
     user_id = get_user_id_by_api_key(key)
