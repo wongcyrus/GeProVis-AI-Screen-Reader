@@ -2,3 +2,4 @@ functions-framework==3.*
 google-cloud-aiplatform
 google-cloud-datastore
 python-magic
+Pillow

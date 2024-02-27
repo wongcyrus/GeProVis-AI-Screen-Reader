@@ -14,6 +14,7 @@ export interface CloudFunctionConstructProps {
     readonly functionCode?: string;
     readonly runtime: string;
     readonly entryPoint: string;
+    readonly availableCpu?: string;
     readonly availableMemory?: string;
     readonly timeout?: number;
     readonly cloudFunctionDeploymentConstruct: CloudFunctionDeploymentConstruct;
@@ -86,6 +87,7 @@ export class CloudFunctionConstruct extends Construct {
                 maxInstanceRequestConcurrency: 1,
                 maxInstanceCount: 100,
                 minInstanceCount: 0,
+                availableCpu: props.availableCpu ?? "1",
                 availableMemory: props.availableMemory ?? "128Mi",
                 timeoutSeconds: props.timeout ?? 60,
                 serviceAccountEmail: this.serviceAccount.email,

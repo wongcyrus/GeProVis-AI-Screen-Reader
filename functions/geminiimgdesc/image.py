@@ -3,6 +3,10 @@ import base64
 import magic
 import vertexai
 
+import requests
+from PIL import Image
+import io
+
 from urllib.request import urlopen
 from vertexai.preview.generative_models import GenerativeModel, Part
 
@@ -11,9 +15,35 @@ MODEL_REGION = os.environ.get("MODEL_REGION")
 MODEL_NAME = os.environ.get("MODEL_NAME")
 
 
+def download_and_resize_image(url, max_size=3*1024*1024):
+    # Download the image
+    response = requests.get(url)
+    img = Image.open(io.BytesIO(response.content))
+
+    # Check the original image size
+    original_size = len(response.content)
+    if original_size <= max_size:
+        return response.content
+
+    print(f"Resize Original image size: {original_size}")
+    # Calculate the resize ratio
+    resize_ratio = (max_size / original_size) ** 0.5
+
+    # Resize the image
+    new_size = (int(img.width * resize_ratio), int(img.height * resize_ratio))
+    resized_img = img.resize(new_size)
+
+    # Convert the image back to bytes
+    byte_arr = io.BytesIO()
+    resized_img.save(byte_arr, format='PNG')
+    resized_bytes = byte_arr.getvalue()
+    print(f"Resized image size: {len(resized_bytes)}")
+
+    return resized_bytes
+
 def get_image_data(img, url):
     if url:
-        b64ImgData = base64.b64encode(urlopen(url).read())
+        b64ImgData = base64.b64encode(download_and_resize_image(url))
         return base64.decodebytes(b64ImgData)
     elif img:
         return base64.decodebytes(img.encode("utf-8"))

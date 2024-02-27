@@ -59,7 +59,8 @@ class GeminiReaderRunnerStack extends TerraformStack {
       runtime: "python311",
       entryPoint: "geminiimgdesc",
       timeout: 600,
-      availableMemory: "512Mi",
+      availableCpu: "1",
+      availableMemory: "1Gi",
       makePublic: false,
       cloudFunctionDeploymentConstruct: cloudFunctionDeploymentConstruct,
       environmentVariables: {
