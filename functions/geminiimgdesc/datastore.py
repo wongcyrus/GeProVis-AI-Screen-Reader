@@ -1,6 +1,7 @@
 import os
 import datetime
 from google.cloud import datastore
+from google.cloud.datastore.query import BaseCompositeFilter, PropertyFilter
 
 # constants to use in this file
 GCP_PROJECT = os.environ.get("GCP_PROJECT")
@@ -71,3 +72,27 @@ def save_data(user_id, hash, ret_text, lang):
         ret_text,
         now,
     )
+
+def get_usages_by_user_id(user_id: str):
+    client = datastore.Client(project=GCP_PROJECT)
+    user_query = client.query(kind="Usage")
+
+    user_query.add_filter(
+        filter=BaseCompositeFilter(
+            "AND",
+            [
+                PropertyFilter("user_id", "=", str(user_id)),
+                PropertyFilter(
+                    "time", ">", datetime.datetime.now() - datetime.timedelta(days=1)
+                ),
+            ],
+        )
+    )
+
+    user_cost_query = client.aggregation_query(query=user_query).sum(
+        property_ref="cost", alias="total_cost_over_1_day"
+    )
+
+    data  = list(user_cost_query.fetch())
+    cost = data[0][0].value if len(data) == 1 else 0
+    return cost

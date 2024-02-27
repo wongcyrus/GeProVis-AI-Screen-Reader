@@ -17,7 +17,7 @@ The problem being addressed is the inability of visually impaired individuals to
 4. **Google Cloud Datastore**: This contains three kinds: ApiKey, Caption, and Usage.
    - **ApiKey**: Matches an API key to a User ID.
    - **Caption**: Saves image hash to caption, which is a cache to skip AI calls for the same image. To protect piracy, we do not log down any URL.
-   - **Usage**: Records usage for each user, including the cost.
+   - **Usage**: Records usage for each user, including the cost and time. Each API key have a daliy cost limit for budget control.
 
 
 ![Architecture of Gemini Pro Vision AI Screen Reader](/images/architecture.jpg)

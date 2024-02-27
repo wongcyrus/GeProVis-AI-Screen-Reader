@@ -2,13 +2,14 @@ import os
 import functions_framework
 import hashlib
 
-from .datastore import get_user_id_by_api_key, get_image_caption, save_data
+from .datastore import get_user_id_by_api_key, get_image_caption, save_data ,get_usages_by_user_id
 from .image import get_image_data, generate_image_description
 
 
 GCP_PROJECT = os.environ.get("GCP_PROJECT")
 MODEL_REGION = os.environ.get("MODEL_REGION")
 MODEL_NAME = os.environ.get("MODEL_NAME")
+DAILY_BUDGET = os.environ.get("DAILY_BUDGET")
 DEFAULT_LANG = "en-US"
 
 
@@ -61,6 +62,10 @@ def geminiimgdesc(request):
     headers = handle_cors(request)
     request_json, request_args = get_request_data(request)
     key, user_id = get_user_key_and_id(request, request_args)
+
+    current_cost = get_usages_by_user_id(user_id)
+
+
     imgData, hash = get_image_data_and_hash(request_json, request_args)
     capture = get_image_caption(hash, DEFAULT_LANG)
 
@@ -68,6 +73,10 @@ def geminiimgdesc(request):
         print("From Datastore:" + capture["caption"])
         return ([capture["caption"]], 200, headers)
 
+    print(f"current_cost: {current_cost}")
+    if current_cost > float(DAILY_BUDGET):
+        return ([f"You have exceeded the limit of {DAILY_BUDGET} USD per day"], 403, headers)
+    
     ret_text = generate_image_description(imgData, DEFAULT_LANG)
     save_data(user_id, hash, ret_text, DEFAULT_LANG)
 

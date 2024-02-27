@@ -66,6 +66,7 @@ class GeminiReaderRunnerStack extends TerraformStack {
       environmentVariables: {
         "MODEL_NAME": process.env.MODEL_NAME!,
         "MODEL_REGION": process.env.MODEL_REGION!,
+        "DAILY_BUDGET": process.env.DAILY_BUDGET!,
       },
     });
 
@@ -84,6 +85,10 @@ class GeminiReaderRunnerStack extends TerraformStack {
         },
         {
           name: "time",
+          direction: "DESCENDING",
+        },
+        {
+          name: "cost",
           direction: "DESCENDING",
         },
       ],
