@@ -64,8 +64,10 @@ class GeminiReaderRunnerStack extends TerraformStack {
       makePublic: false,
       cloudFunctionDeploymentConstruct: cloudFunctionDeploymentConstruct,
       environmentVariables: {
-        "MODEL_NAME": process.env.MODEL_NAME!,        
+        "MODEL_NAME": process.env.MODEL_NAME!,
         "DAILY_BUDGET": process.env.DAILY_BUDGET!,
+        "LANGCHAIN_TRACING_V2": process.env.LANGCHAIN_TRACING_V2!,
+        "LANGCHAIN_API_KEY": process.env.LANGCHAIN_API_KEY!,
       },
     });
 

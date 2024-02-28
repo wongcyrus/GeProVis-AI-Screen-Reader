@@ -11,7 +11,7 @@ from .datastore import (
     save_data,
     get_usages_by_user_id,
 )
-from .image import get_image_data, generate_image_description, REGION_RATE_LIMIT
+from .image import generate_image_description, REGION_RATE_LIMIT
 
 
 GCP_PROJECT = os.environ.get("GCP_PROJECT")
@@ -55,13 +55,11 @@ def get_user_id(request, request_args):
     return user_id
 
 
-def get_image_data_and_hash_and_locale(request_json, request_args):
-    img = get_value(request_json, request_args, "img")
+def get_url_hash_and_locale(request_json, request_args):
     url = get_value(request_json, request_args, "url")
-    imgData = get_image_data(img, url)
-    hash = hashlib.sha256(imgData).hexdigest()
+    hash = hashlib.sha256(url.encode('utf-8')).hexdigest()
     locale = get_value(request_json, request_args, "lang", DEFAULT_LANG)
-    return imgData, hash, locale
+    return url, hash, locale
 
 
 @functions_framework.http
@@ -72,9 +70,7 @@ def geminiimgdesc(request):
 
     current_cost = get_usages_by_user_id(user_id)
 
-    imgData, hash, locale = get_image_data_and_hash_and_locale(
-        request_json, request_args
-    )
+    url, hash, locale = get_url_hash_and_locale(request_json, request_args)
     capture = get_image_caption(hash, DEFAULT_LANG)
 
     if capture:
@@ -103,7 +99,7 @@ def geminiimgdesc(request):
             headers,
         )
 
-    ret_text = generate_image_description(imgData, locale, model_region)
+    ret_text = generate_image_description(url, locale, model_region)
     save_data(user_id, hash, ret_text, locale, model_region)
 
     return ([ret_text], 200, headers)
