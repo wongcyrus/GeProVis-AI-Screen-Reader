@@ -15,8 +15,6 @@ from .image import get_image_data, generate_image_description, REGION_RATE_LIMIT
 
 
 GCP_PROJECT = os.environ.get("GCP_PROJECT")
-MODEL_REGION = os.environ.get("MODEL_REGION")
-MODEL_NAME = os.environ.get("MODEL_NAME")
 DAILY_BUDGET = os.environ.get("DAILY_BUDGET")
 DEFAULT_LANG = "en-US"
 
@@ -47,14 +45,14 @@ def get_request_data(request):
     return request.get_json(silent=True), request.args
 
 
-def get_user_key_and_id(request, request_args):
+def get_user_id(request, request_args):
     key = request.headers.get("X-API-Key")
     if not key:
         key = request_args["key"]
     print(f"key: {key}")
     user_id = get_user_id_by_api_key(key)
     print(f"user_id: {user_id}")
-    return key, user_id
+    return user_id
 
 
 def get_image_data_and_hash_and_locale(request_json, request_args):
@@ -70,7 +68,7 @@ def get_image_data_and_hash_and_locale(request_json, request_args):
 def geminiimgdesc(request):
     headers = handle_cors(request)
     request_json, request_args = get_request_data(request)
-    key, user_id = get_user_key_and_id(request, request_args)
+    user_id = get_user_id(request, request_args)
 
     current_cost = get_usages_by_user_id(user_id)
 

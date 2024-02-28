@@ -7,7 +7,6 @@ import requests
 from PIL import Image
 import io
 
-from urllib.request import urlopen
 from vertexai.preview.generative_models import GenerativeModel, Part
 
 GCP_PROJECT = os.environ.get("GCP_PROJECT")

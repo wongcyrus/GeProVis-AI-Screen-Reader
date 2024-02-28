@@ -5,8 +5,6 @@ from google.cloud.datastore.query import BaseCompositeFilter, PropertyFilter
 
 # constants to use in this file
 GCP_PROJECT = os.environ.get("GCP_PROJECT")
-MODEL_REGION = os.environ.get("MODEL_REGION")
-MODEL_NAME = os.environ.get("MODEL_NAME")
 
 
 def get_datastore_client():
