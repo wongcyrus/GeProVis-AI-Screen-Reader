@@ -35,16 +35,21 @@ def get_image_caption(hash: str, lang: str):
     return get_entity_from_datastore("Caption", hash + "->" + lang)
 
 
-def save_image_caption(hash: str, url: str, caption: str, lang: str, now: datetime):
+def save_image_caption(hash: str, caption: str, lang: str, now: datetime):
     save_entity_to_datastore(
         "Caption",
         hash + "->" + lang,
-        {"url": url, "caption": caption, "lang": lang, "time": now},
+        {"caption": caption, "lang": lang, "time": now},
     )
 
 
 def save_usage(
-    user_id: str, hash: str, text_input: str, text_output: str, now: datetime
+    user_id: str,
+    hash: str,
+    text_input: str,
+    text_output: str,
+    model_region: str,
+    now: datetime,
 ):
     cost = (
         0.0025 + 0.000125 * len(text_input) / 1000 + 0.000375 * len(text_output) / 1000
@@ -57,21 +62,24 @@ def save_usage(
             "text_input": text_input,
             "text_output": text_output,
             "cost": cost,
+            "model_region": model_region,
             "time": now,
         },
     )
 
 
-def save_data(user_id, hash, ret_text, lang):
+def save_data(user_id, hash, ret_text, locale, model_region):
     now = datetime.datetime.now()
-    save_image_caption(hash, None, ret_text, lang, now)
+    save_image_caption(hash, ret_text, locale, now)
     save_usage(
         user_id,
         hash,
-        f"Describes the image in less than 40 words in {lang}",
+        f"Describes the image in less than 40 words in {locale}",
         ret_text,
+        model_region,
         now,
     )
+
 
 def get_usages_by_user_id(user_id: str):
     client = datastore.Client(project=GCP_PROJECT)
@@ -93,6 +101,6 @@ def get_usages_by_user_id(user_id: str):
         property_ref="cost", alias="total_cost_over_1_day"
     )
 
-    data  = list(user_cost_query.fetch())
+    data = list(user_cost_query.fetch())
     cost = data[0][0].value if len(data) == 1 else 0
     return cost

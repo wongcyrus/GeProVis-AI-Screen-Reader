@@ -15,7 +15,24 @@ MODEL_REGION = os.environ.get("MODEL_REGION")
 MODEL_NAME = os.environ.get("MODEL_NAME")
 
 
-def download_and_resize_image(url, max_size=3*1024*1024):
+REGION_RATE_LIMIT = {
+    "us-central1": 100,
+    "us-east4": 60,
+    "us-west1": 60,
+    "us-west4": 60,
+    "northamerica-northeast1": 60,
+    "europe-west1": 60,
+    "europe-west2": 60,
+    "europe-west3": 60,
+    "europe-west3": 60,
+    "europe-west9": 60,
+    "asia-northeast1": 60,
+    "asia-northeast3": 60,
+    "asia-southeast1": 60,
+}
+
+
+def download_and_resize_image(url, max_size=3 * 1024 * 1024):
     # Download the image
     response = requests.get(url)
     img = Image.open(io.BytesIO(response.content))
@@ -35,11 +52,12 @@ def download_and_resize_image(url, max_size=3*1024*1024):
 
     # Convert the image back to bytes
     byte_arr = io.BytesIO()
-    resized_img.save(byte_arr, format='PNG')
+    resized_img.save(byte_arr, format="PNG")
     resized_bytes = byte_arr.getvalue()
     print(f"Resized image size: {len(resized_bytes)}")
 
     return resized_bytes
+
 
 def get_image_data(img, url):
     if url:
@@ -49,10 +67,10 @@ def get_image_data(img, url):
         return base64.decodebytes(img.encode("utf-8"))
 
 
-def generate_image_description(imgData, lang):
+def generate_image_description(imgData, lang: str, model_region: str):
     mime_type = magic.from_buffer(imgData, mime=True)
     source_image = Part.from_data(imgData, mime_type=mime_type)
-    vertexai.init(project=GCP_PROJECT, location=MODEL_REGION)
+    vertexai.init(project=GCP_PROJECT, location=model_region)
     model = GenerativeModel(MODEL_NAME)
     prompt = f"""Describes the image in less than 40 words in {lang}."""
     print("Calling Model.")

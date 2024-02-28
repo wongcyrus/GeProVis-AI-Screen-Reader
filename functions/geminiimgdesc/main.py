@@ -1,9 +1,15 @@
 import os
+import random
 import functions_framework
 import hashlib
 
-from .datastore import get_user_id_by_api_key, get_image_caption, save_data ,get_usages_by_user_id
-from .image import get_image_data, generate_image_description
+from .datastore import (
+    get_user_id_by_api_key,
+    get_image_caption,
+    save_data,
+    get_usages_by_user_id,
+)
+from .image import get_image_data, generate_image_description, REGION_RATE_LIMIT
 
 
 GCP_PROJECT = os.environ.get("GCP_PROJECT")
@@ -49,12 +55,13 @@ def get_user_key_and_id(request, request_args):
     return key, user_id
 
 
-def get_image_data_and_hash(request_json, request_args):
+def get_image_data_and_hash_and_locale(request_json, request_args):
     img = get_value(request_json, request_args, "img")
     url = get_value(request_json, request_args, "url")
     imgData = get_image_data(img, url)
     hash = hashlib.sha256(imgData).hexdigest()
-    return imgData, hash
+    locale = get_value(request_json, request_args, "lang", DEFAULT_LANG)
+    return imgData, hash, locale
 
 
 @functions_framework.http
@@ -65,8 +72,9 @@ def geminiimgdesc(request):
 
     current_cost = get_usages_by_user_id(user_id)
 
-
-    imgData, hash = get_image_data_and_hash(request_json, request_args)
+    imgData, hash, locale = get_image_data_and_hash_and_locale(
+        request_json, request_args
+    )
     capture = get_image_caption(hash, DEFAULT_LANG)
 
     if capture:
@@ -75,9 +83,16 @@ def geminiimgdesc(request):
 
     print(f"current_cost: {current_cost}")
     if current_cost > float(DAILY_BUDGET):
-        return ([f"You have exceeded the limit of {DAILY_BUDGET} USD per day"], 403, headers)
-    
-    ret_text = generate_image_description(imgData, DEFAULT_LANG)
-    save_data(user_id, hash, ret_text, DEFAULT_LANG)
+        return (
+            [f"You have exceeded the limit of {DAILY_BUDGET} USD per day"],
+            403,
+            headers,
+        )
+
+    # REGION_RATE_LIMIT random pick on as model region
+    model_region = random.choice(list(REGION_RATE_LIMIT.keys()))
+
+    ret_text = generate_image_description(imgData, locale, model_region)
+    save_data(user_id, hash, ret_text, locale, model_region)
 
     return ([ret_text], 200, headers)
