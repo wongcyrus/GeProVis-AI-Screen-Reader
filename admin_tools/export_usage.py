@@ -60,9 +60,32 @@ def get_usages_by_user_id():
     # print(results)
     # return results
 
+def get_usages_by_region():
+    client = datastore.Client(project=project_id)
+    user_query = client.query(kind="Usage")
+
+    user_query.add_filter(
+        filter=BaseCompositeFilter(
+            "AND",
+            [
+                PropertyFilter("model_region", "=", "europe-west3"),
+                PropertyFilter(
+                    "time", ">", datetime.datetime.now() - datetime.timedelta(days=1)
+                ),
+            ],
+        )
+    )
+
+    region_query = client.aggregation_query(query=user_query).count(
+        alias="call_over_1_minute"
+    )
+
+    data  = list(region_query.fetch())
+    region_query_query_result = data[0][0] if len(data) == 1 else 0
+    print(region_query_query_result.value)
 
 if __name__ == "__main__":
     # usages = get_all_usages()
     # print(len(usages))
     # save_usages_to_xlsx(usages)
-    get_usages_by_user_id()
+    get_usages_by_region()

@@ -1,9 +1,11 @@
 import os
 import random
+from time import sleep
 import functions_framework
 import hashlib
 
 from .datastore import (
+    get_usages_by_region,
     get_user_id_by_api_key,
     get_image_caption,
     save_data,
@@ -89,8 +91,19 @@ def geminiimgdesc(request):
             headers,
         )
 
-    # REGION_RATE_LIMIT random pick on as model region
-    model_region = random.choice(list(REGION_RATE_LIMIT.keys()))
+    for i in range(3):
+        # REGION_RATE_LIMIT random pick on as model region
+        model_region = random.choice(list(REGION_RATE_LIMIT.keys()))
+        last_minute_call_count = get_usages_by_region(model_region)
+        if (REGION_RATE_LIMIT[model_region] - 2) > last_minute_call_count:
+            break
+        sleep(i * random.randint(1, 2))
+    else:
+        return (
+            [f"Overloaded, please try again later"],
+            503,
+            headers,
+        )
 
     ret_text = generate_image_description(imgData, locale, model_region)
     save_data(user_id, hash, ret_text, locale, model_region)

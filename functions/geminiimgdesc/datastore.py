@@ -104,3 +104,28 @@ def get_usages_by_user_id(user_id: str):
     data = list(user_cost_query.fetch())
     cost = data[0][0].value if len(data) == 1 else 0
     return cost
+
+
+def get_usages_by_region(region: str):
+    client = datastore.Client(project=GCP_PROJECT)
+    user_query = client.query(kind="Usage")
+
+    user_query.add_filter(
+        filter=BaseCompositeFilter(
+            "AND",
+            [
+                PropertyFilter("model_region", "=", region),
+                PropertyFilter(
+                    "time", ">", datetime.datetime.now() - datetime.timedelta(minutes=1)
+                ),
+            ],
+        )
+    )
+
+    region_query = client.aggregation_query(query=user_query).count(
+        alias="call_over_1_minute"
+    )
+
+    data = list(region_query.fetch())
+    region_query_query_result = data[0][0] if len(data) == 1 else 0
+    return region_query_query_result.value

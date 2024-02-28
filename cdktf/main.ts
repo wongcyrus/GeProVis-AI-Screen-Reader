@@ -92,6 +92,20 @@ class GeminiReaderRunnerStack extends TerraformStack {
         },
       ],
     });
+    new GoogleDatastoreIndex(this, "google_datastore_index_2", {
+      project: project.projectId,
+      kind: "Usage",
+      properties: [
+        {
+          name: "model_region",
+          direction: "ASCENDING",
+        },
+        {
+          name: "time",
+          direction: "DESCENDING",
+        }
+      ],
+    });
 
     new GoogleProjectIamMember(this, "AiplatformProjectIamMember", {
       project: project.id,
