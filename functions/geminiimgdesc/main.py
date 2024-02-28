@@ -11,7 +11,11 @@ from .datastore import (
     save_data,
     get_usages_by_user_id,
 )
-from .image import generate_image_description, REGION_RATE_LIMIT
+from .image import (
+    download_and_resize_image,
+    generate_image_description,
+    REGION_RATE_LIMIT,
+)
 
 
 GCP_PROJECT = os.environ.get("GCP_PROJECT")
@@ -55,11 +59,45 @@ def get_user_id(request, request_args):
     return user_id
 
 
-def get_url_hash_and_locale(request_json, request_args):
+def get_url_and_locale(request_json, request_args):
     url = get_value(request_json, request_args, "url")
-    hash = hashlib.sha256(url.encode('utf-8')).hexdigest()
     locale = get_value(request_json, request_args, "lang", DEFAULT_LANG)
-    return url, hash, locale
+    return url, locale
+
+
+def exceeded_daily_budget_response(current_cost, headers):
+    print(f"current_cost: {current_cost}")
+    return (
+        [f"You have exceeded the limit of {DAILY_BUDGET} USD per day"],
+        403,
+        headers,
+    )
+
+
+def process_image(url):
+    file_path = download_and_resize_image(url)
+    with open(file_path, "rb") as image_file:
+        image_bytes = image_file.read()
+    hash = hashlib.sha256(image_bytes).hexdigest()
+    return image_bytes, hash
+
+
+def select_model_region():
+    for i in range(3):
+        model_region = random.choice(list(REGION_RATE_LIMIT.keys()))
+        last_minute_call_count = get_usages_by_region(model_region)
+        if (REGION_RATE_LIMIT[model_region] - 2) > last_minute_call_count:
+            return model_region
+        sleep(i * random.randint(1, 2))
+    return None
+
+
+def overloaded_response(headers):
+    return (
+        [f"Overloaded, please try again later"],
+        503,
+        headers,
+    )
 
 
 @functions_framework.http
@@ -68,38 +106,23 @@ def geminiimgdesc(request):
     request_json, request_args = get_request_data(request)
     user_id = get_user_id(request, request_args)
 
-    current_cost = get_usages_by_user_id(user_id)
-
-    url, hash, locale = get_url_hash_and_locale(request_json, request_args)
+    url, locale = get_url_and_locale(request_json, request_args)
+    image_bytes, hash = process_image(url)
     capture = get_image_caption(hash, DEFAULT_LANG)
 
     if capture:
         print("From Datastore:" + capture["caption"])
         return ([capture["caption"]], 200, headers)
 
-    print(f"current_cost: {current_cost}")
+    current_cost = get_usages_by_user_id(user_id)
     if current_cost > float(DAILY_BUDGET):
-        return (
-            [f"You have exceeded the limit of {DAILY_BUDGET} USD per day"],
-            403,
-            headers,
-        )
+        return exceeded_daily_budget_response(current_cost, headers)
 
-    for i in range(3):
-        # REGION_RATE_LIMIT random pick on as model region
-        model_region = random.choice(list(REGION_RATE_LIMIT.keys()))
-        last_minute_call_count = get_usages_by_region(model_region)
-        if (REGION_RATE_LIMIT[model_region] - 2) > last_minute_call_count:
-            break
-        sleep(i * random.randint(1, 2))
-    else:
-        return (
-            [f"Overloaded, please try again later"],
-            503,
-            headers,
-        )
+    model_region = select_model_region()
+    if model_region is None:
+        return overloaded_response(headers)
 
-    ret_text = generate_image_description(url, locale, model_region)
+    ret_text = generate_image_description(image_bytes, locale, model_region)
     save_data(user_id, hash, ret_text, locale, model_region)
 
     return ([ret_text], 200, headers)

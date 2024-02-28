@@ -65,15 +65,11 @@ def download_and_resize_image(url, max_size=3 * 1024 * 1024) -> str:
     return file_path
 
 
-def generate_image_description(url: str, lang: str, model_region: str):
-    file_path = download_and_resize_image(url)
-    with open(file_path, "rb") as image_file:
-        image_bytes = image_file.read()
-
+def generate_image_description(image_bytes, lang: str, model_region: str):
     vertexai.init(project=GCP_PROJECT, location=model_region)
 
     llm = ChatVertexAI(
-        model_name="gemini-pro-vision",
+        model_name=MODEL_NAME,
         temperature=0.4,
         max_output_tokens=40,
         top_p=1,
