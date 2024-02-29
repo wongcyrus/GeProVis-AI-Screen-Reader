@@ -10,15 +10,16 @@ from .datastore import (
     get_image_caption,
     save_data,
     get_usages_by_user_id,
+    save_image_caption_for_lang,
 )
 from .image import (
     download_and_resize_image,
     generate_image_description,
     REGION_RATE_LIMIT,
 )
+from .translator import translate_text
 
 
-GCP_PROJECT = os.environ.get("GCP_PROJECT")
 DAILY_BUDGET = os.environ.get("DAILY_BUDGET")
 DEFAULT_LANG = "en-US"
 
@@ -108,10 +109,24 @@ def geminiimgdesc(request):
 
     url, locale = get_url_and_locale(request_json, request_args)
     image_bytes, hash = process_image(url)
-    capture = get_image_caption(hash, DEFAULT_LANG)
+    capture = get_image_caption(hash, locale)
 
     if capture:
         print("From Datastore:" + capture["caption"])
+        return ([capture["caption"]], 200, headers)
+    capture = get_image_caption(hash)
+    if capture:
+        translated_caption = translate_text(capture["caption"], locale)
+        save_image_caption_for_lang(hash, translated_caption, locale)
+        print(
+            'From Datastore and translate from "'
+            + capture["caption"]
+            + '" to '
+            + locale
+            + ':"'
+            + translated_caption
+            + '"'
+        )
         return ([capture["caption"]], 200, headers)
 
     current_cost = get_usages_by_user_id(user_id)

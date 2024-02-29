@@ -11,9 +11,6 @@ from langchain_google_vertexai import ChatVertexAI
 from langchain_core.messages import HumanMessage
 from langchain_google_vertexai import ChatVertexAI
 
-
-GCP_PROJECT = os.environ.get("GCP_PROJECT")
-MODEL_REGION = os.environ.get("MODEL_REGION")
 MODEL_NAME = os.environ.get("MODEL_NAME")
 
 
@@ -66,7 +63,7 @@ def download_and_resize_image(url, max_size=3 * 1024 * 1024) -> str:
 
 
 def generate_image_description(image_bytes, lang: str, model_region: str):
-    vertexai.init(project=GCP_PROJECT, location=model_region)
+    vertexai.init(location=model_region)
 
     llm = ChatVertexAI(
         model_name=MODEL_NAME,

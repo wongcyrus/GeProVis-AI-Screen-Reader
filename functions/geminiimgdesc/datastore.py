@@ -3,21 +3,14 @@ import datetime
 from google.cloud import datastore
 from google.cloud.datastore.query import BaseCompositeFilter, PropertyFilter
 
-# constants to use in this file
-GCP_PROJECT = os.environ.get("GCP_PROJECT")
-
-
-def get_datastore_client():
-    return datastore.Client(project=GCP_PROJECT)
-
 
 def get_entity_from_datastore(kind: str, id: str):
-    client = get_datastore_client()
+    client = datastore.Client()
     return client.get(client.key(kind, id))
 
 
 def save_entity_to_datastore(kind: str, id: str, data: dict):
-    client = get_datastore_client()
+    client = datastore.Client()
     key = client.key(kind, id)
     entity = datastore.Entity(key=key)
     entity.update(data)
@@ -29,14 +22,26 @@ def get_user_id_by_api_key(key: str) -> str:
     return str(user["user_id"])
 
 
-def get_image_caption(hash: str, lang: str):
+def get_image_caption(hash: str, lang: str = None):
+    if lang is None:
+        return get_entity_from_datastore("Caption", hash)
     return get_entity_from_datastore("Caption", hash + "->" + lang)
 
 
-def save_image_caption(hash: str, caption: str, lang: str, now: datetime):
+def save_image_caption_for_lang(hash: str, caption: str, lang: str):
+    now = datetime.datetime.now()
     save_entity_to_datastore(
         "Caption",
         hash + "->" + lang,
+        {"caption": caption, "lang": lang, "time": now},
+    )
+
+
+def save_image_caption(hash: str, caption: str, lang: str, now: datetime):
+    save_image_caption_for_lang(hash, caption, lang, now)
+    save_entity_to_datastore(
+        "Caption",
+        hash,
         {"caption": caption, "lang": lang, "time": now},
     )
 
@@ -80,7 +85,7 @@ def save_data(user_id, hash, ret_text, locale, model_region):
 
 
 def get_usages_by_user_id(user_id: str):
-    client = datastore.Client(project=GCP_PROJECT)
+    client = datastore.Client()
     user_query = client.query(kind="Usage")
 
     user_query.add_filter(
@@ -105,7 +110,7 @@ def get_usages_by_user_id(user_id: str):
 
 
 def get_usages_by_region(region: str):
-    client = datastore.Client(project=GCP_PROJECT)
+    client = datastore.Client()
     user_query = client.query(kind="Usage")
 
     user_query.add_filter(

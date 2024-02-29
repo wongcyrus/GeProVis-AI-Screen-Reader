@@ -1,9 +1,9 @@
-google
-google-cloud
-google-cloud-api-keys
-google-cloud-datastore
-google-api-python-client
 openpyxl
+functions-framework==3.*
+google-cloud-aiplatform
+google-cloud-translate
+google-cloud-datastore
+python-magic
 langchain
 langsmith
 langchain-google-vertexai

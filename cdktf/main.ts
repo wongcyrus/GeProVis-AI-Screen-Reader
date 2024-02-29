@@ -15,6 +15,7 @@ import * as dotenv from 'dotenv';
 import { ApigatewayConstruct } from "./components/api-gateway-construct";
 import { DatastoreConstruct } from "./components/datastore-construct";
 import { GoogleProjectIamMember } from "./.gen/providers/google-beta/google-project-iam-member";
+import { GoogleProjectService } from "./.gen/providers/google-beta/google-project-service";
 dotenv.config();
 
 class GeminiReaderRunnerStack extends TerraformStack {
@@ -51,6 +52,13 @@ class GeminiReaderRunnerStack extends TerraformStack {
         randomProvider: randomProvider,
       });
 
+    const translateService = new GoogleProjectService(this, `translateService`, {
+      project: project.projectId,
+      service: "translate.googleapis.com",
+      disableOnDestroy: false,
+    })
+    cloudFunctionDeploymentConstruct.services.push(translateService);
+
     //For the first deployment, it takes a while for API to be enabled.
     await new Promise(r => setTimeout(r, 30000));
 
@@ -69,7 +77,7 @@ class GeminiReaderRunnerStack extends TerraformStack {
         "LANGCHAIN_TRACING_V2": process.env.LANGCHAIN_TRACING_V2!,
         "LANGCHAIN_API_KEY": process.env.LANGCHAIN_API_KEY!,
       },
-    });
+    });  
 
     await DatastoreConstruct.create(this, " geminiImgDescDatastore", {
       project: project.projectId,
@@ -112,6 +120,12 @@ class GeminiReaderRunnerStack extends TerraformStack {
     new GoogleProjectIamMember(this, "AiplatformProjectIamMember", {
       project: project.id,
       role: "roles/aiplatform.user",
+      member: "serviceAccount:" + geminiImgDescCloudFunctionConstruct.serviceAccount.email,
+    });
+    
+    new GoogleProjectIamMember(this, "CloudtranslateProjectIamMember", {
+      project: project.id,
+      role: "roles/cloudtranslate.user",
       member: "serviceAccount:" + geminiImgDescCloudFunctionConstruct.serviceAccount.email,
     });
 

@@ -3,7 +3,6 @@ import base64
 import magic
 from urllib.request import urlopen
 import vertexai
-# from vertexai.vision_models import ImageTextModel, Image
 from vertexai.preview.generative_models import GenerativeModel, Part
 from google.cloud import translate
 
