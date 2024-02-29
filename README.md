@@ -49,6 +49,11 @@ This is quick R&D without authenication and rate limit.
 #### Production Deplolyment
 This creates a new project on the Google Cloud Platform that incorporates API Gateway, DataStore, and Cloud Function. Clone this repository and establish a Codespace.
 
+##### Setup
+Rename cdktf/.env.template to .env
+
+Update the value. 
+
 ##### Login your GCP account
 ```
 gcloud auth application-default login
