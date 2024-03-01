@@ -54,6 +54,21 @@ Rename cdktf/.env.template to .env
 
 Update the value. 
 
+```
+PROJECTID=gemini-screen-reader
+BillING_ACCOUNT=<YOUR GCP Billing Account>
+REGION=us-east1
+MODEL_NAME=gemini-1.0-pro-vision-001
+DAILY_BUDGET=0.1
+LANGCHAIN_TRACING_V2=false
+LANGCHAIN_API_KEY=
+GOOGLE_APPLICATION_CREDENTIALS=/home/codespace/.config/gcloud/application_default_credentials.json
+```
+if you want to use LangSmith, set LANGCHAIN_TRACING_V2=true and LANGCHAIN_API_KEY=<API Key>.
+
+DAILY_BUDGET is the cost limit within 24 hours per user.
+
+
 ##### Login your GCP account
 ```
 gcloud auth application-default login
