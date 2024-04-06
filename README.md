@@ -1,4 +1,4 @@
-# Gemini Pro Vision AI Screen Reader
+# GeProV AI Screen Reader
 Experience the magic of Gemini Pro Vision AI Screen Reader in this thrilling video. We've turbocharged the traditional Google ChromeVox Screen Reader with the mighty power of Google Gemini Pro Vision. Our mission? To tackle the challenge of web image information access for those with visual impairments.
 
 The problem being addressed is the inability of visually impaired individuals to access image information due to the lack of adherence to W3C web accessibility initiatives by websites. Currently, about 60% of websites lack meaningful alternate text for their images. Moreover, it is unfeasible to retroactively add descriptive text to all existing websites manually.
@@ -20,7 +20,7 @@ The problem being addressed is the inability of visually impaired individuals to
    - **Usage**: Records usage for each user, including the cost and time. Each API key have a daily cost limit for budget control.
 
 
-![Architecture of Gemini Pro Vision AI Screen Reader](/images/architecture.jpg)
+![Architecture of GeProV AI Screen Reader](/images/architecture.jpg)
 
 ## Current limitation
 ChromeVox, behind the scenes, captures URLs and sends this information, along with the browser locale, to the Cloud Function. We have experimented with two different approaches. The first involves ChromeVox downloading the image and sending it to the cloud function, but this has occasionally encountered CORS permission issues. The second approach has ChromeVox sending the URL to the cloud function, which then downloads the image. However, this doesn't work if the site requires a login to access the image.
