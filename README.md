@@ -39,7 +39,7 @@ We welcome any opinions or suggestions or pull request to help resolve these iss
 3. After building the ChromeVox Classic browser extension, install the extension under Chrome browser with developer mode turned on
 
 #### Pre-built download
-You may download the [pre-built application](chromevox/build/aichromevox.zip) for the testing
+You may download the [pre-built application](chromevoxclassic/build/aichromevox.zip) for the testing
 
 #### Usage and configuration
 1. Install with "Load unpacked"; the language of generated image description follows the current selected voices of the TTS
