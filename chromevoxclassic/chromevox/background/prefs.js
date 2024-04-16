@@ -80,7 +80,11 @@ cvox.ChromeVoxPrefs.DEFAULT_PREFS = {
   'useIBeamCursor': cvox.ChromeVox.isMac,
   'useVerboseMode': true,
   'siteSpecificEnhancements': true,
-  'useNext': false
+  'useNext': false,
+  'useGemini': false, //enable or disable Gemini
+  'authKey': '', //API auth key
+  'geminiUrl': '', //API endpoint for Gemini
+  'ttslang': 'en-US' //Current Locale code for TTS
 };
 
 
@@ -211,7 +215,7 @@ cvox.ChromeVoxPrefs.prototype.sendPrefsToPort = function(port) {
  * @param {string} key The pref key.
  * @param {Object|string} value The new value of the pref.
  */
-cvox.ChromeVoxPrefs.prototype.setPref = function(key, value) {
+cvox.ChromeVoxPrefs.prototype.setPref = function(key, value) { console.log(key+'=>'+value);
   if (localStorage[key] != value) {
     localStorage[key] = value;
     this.sendPrefsToAllTabs(true, false);

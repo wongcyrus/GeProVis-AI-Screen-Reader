@@ -149,12 +149,12 @@ cvox.ChromeHost.prototype.reinit = function() {
 cvox.ChromeHost.prototype.onPageLoad = function() {
   cvox.PdfProcessor.processEmbeddedPdfs();
 
-  cvox.ExtensionBridge.addDisconnectListener(goog.bind(async function() {
+  cvox.ExtensionBridge.addDisconnectListener(goog.bind(function() {
     cvox.ChromeVox.isActive = false;
     cvox.ChromeVoxEventWatcher.cleanup(window);
     // TODO(stoarca): Huh?? Why are we resetting during disconnect?
     // This is not appropriate behavior!
-    await cvox.ChromeVox.navigationManager.reset();
+    cvox.ChromeVox.navigationManager.reset();
   }, this));
 };
 

@@ -13,6 +13,7 @@ goog.provide('cvox.DomUtil');
 goog.require('cvox.AbstractTts');
 goog.require('cvox.AriaUtil');
 goog.require('cvox.ChromeVox');
+goog.require('cvox.ChromeVoxPrefs');
 goog.require('cvox.DomPredicates');
 goog.require('cvox.Memoize');
 goog.require('cvox.NodeState');
@@ -113,6 +114,27 @@ cvox.DomUtil.TAG_TO_INFORMATION_TABLE_BRIEF_MSG = {
 cvox.DomUtil.FORMATTING_TAGS =
     ['B', 'BIG', 'CITE', 'CODE', 'DFN', 'EM', 'I', 'KBD', 'SAMP', 'SMALL',
      'SPAN', 'STRIKE', 'STRONG', 'SUB', 'SUP', 'U', 'VAR'];
+
+cvox.DomUtil.imageCaptions = new Map();
+cvox.DomUtil.backgroundPrefs = new cvox.ChromeVoxPrefs();
+
+
+// cvox.DomUtil.loadPrefs = function() {
+(async () => {
+  // console.log('loadPrefs');
+  cvox.ExtensionBridge.addMessageListener(function(msg) {
+    if (msg['prefs']) {
+      cvox.DomUtil.backgroundPrefs = msg['prefs'];
+      // console.log(cvox.DomUtil.backgroundPrefs);
+    }
+  });
+
+  // Make the initial request for prefs.
+  cvox.ExtensionBridge.send({
+    'target': 'Prefs',
+    'action': 'getPrefs'
+  });
+})();
 
 /**
  * Determine if the given node is visible on the page. This does not check if
@@ -910,8 +932,6 @@ cvox.DomUtil.getValue = async function(node) {
   return '';
 };
 
-cvox.DomUtil.imageCaptions = new Map();
-
 /**
  * Given an image node, return its title as a string. The preferred title
  * is always the alt text, and if that's not available, then the title
@@ -921,70 +941,80 @@ cvox.DomUtil.imageCaptions = new Map();
  * @return {string} The title of the image.
  */
 cvox.DomUtil.getImageTitle = async function(node) {
+  var prefs = cvox.DomUtil.backgroundPrefs;
   var text;
-  // if (node.hasAttribute('alt')) {
-  //   text = node.alt;
-  // } else if (node.hasAttribute('title')) {
-  //   text = node.title;
-  // } else {
-    var url = node.src;
-    if (!cvox.DomUtil.imageCaptions.has(url)) {
-      // console.log('calling '+url);
-      var imgBase64;
-      if (url.substring(0, 4) == 'data') {
-      // if (url.substring(0, 4) != 'data') {
-      //   // (async () => {
-      //     imgBase64 = await cvox.DomUtil.getImageBase64(url);
-      //     // await getImageBase64(url).then((b64)=>console.log(b64));
-      //   // })();
-  
-      //   // console.log(imgBase64);
-
-      //   // var filename = url.substring(
-      //   //     url.lastIndexOf('/') + 1, url.lastIndexOf('.'));
-
-      //   // // Hack to not speak the filename if it's ridiculously long.
-      //   // if (filename.length >= 1 && filename.length <= 16) {
-      //   //   text = filename + ' Image';
-      //   // } else {
-      //   //   text = 'Image';
-      //   // }
-      // } else {
-        // text = 'Image';
-        imgBase64 = url.replace(/data:image\/.*;base64,/,"");
-      }
-      if (imgBase64 && imgBase64!='') {
-        text = await cvox.DomUtil.getImageCaption(null, imgBase64);
-      } else {
-        text = await cvox.DomUtil.getImageCaption(url);
-      }
-      if (text && text!='') {
-        cvox.DomUtil.imageCaptions.set(url, text);
-      }
+  if (prefs.useGemini && prefs.useGemini=="true") {
+    console.log("Gemini enabled");
+    text = await cvox.DomUtil.getGeminiImageTitle(node);
+  } else {
+    console.log("Gemini disabled");
+    if (node.hasAttribute('alt')) {
+      text = node.alt;
+    } else if (node.hasAttribute('title')) {
+      text = node.title;
     } else {
-      text = cvox.DomUtil.imageCaptions.get(url);
-    }
+      var url = node.src;
+      if (url.substring(0, 4) != 'data') {
+        var filename = url.substring(
+            url.lastIndexOf('/') + 1, url.lastIndexOf('.'));
 
-  // }
-  window.console.log(text);
+        // Hack to not speak the filename if it's ridiculously long.
+        if (filename.length >= 1 && filename.length <= 16) {
+          text = filename + ' Image';
+        } else {
+          text = 'Image';
+        }
+      } else {
+        text = 'Image';
+      }
+    }
+  }
+  console.log(text);
   return text;
 };
 
+/**
+ * Given an image node, get the generated description from Gemini,
+ * then return it as a string. 
+ * @param {Node} node The image node.
+ * @return {string} The title of the image.
+ */
+cvox.DomUtil.getGeminiImageTitle = async function(node) {
+  var text;
+  var url = node.src;
+  if (!cvox.DomUtil.imageCaptions.has(url)) {
+    // console.log('calling '+url);
+    var imgBase64;
+    if (url.substring(0, 4) == 'data') {
+      imgBase64 = url.replace(/data:image\/.*;base64,/,"");
+    }
+    if (imgBase64 && imgBase64!='') {
+      text = await cvox.DomUtil.getImageCaption(null, imgBase64);
+    } else {
+      text = await cvox.DomUtil.getImageCaption(url);
+    }
+    if (text && text!='') {
+      cvox.DomUtil.imageCaptions.set(url, text);
+    }
+  } else {
+    text = cvox.DomUtil.imageCaptions.get(url);
+  }
+
+  return text;
+};
+
+/**
+ * Given an image url, get the base64 string of the image,
+ * then return it as a string. 
+ * @param {String} imgSrc The image url.
+ * @return {string} The base64 string of the image.
+ */
 cvox.DomUtil.getImageBase64 = async function(imgSrc) {
   // window.console.log(imgSrc);
   try {
     //Get image base64 via cors proxy
     const response = await fetch("https://us-central1-testproject-401009.cloudfunctions.net/cors-proxy?url="+imgSrc);
     return response.text();
-
-    // Get image base64 locally
-    // const response = await fetch(imgSrc);
-    // const blob = await response.blob();
-    // return await new Promise(callback => {
-    //   let reader = new FileReader();
-    //   reader.onload = function () { console.log(this.result);callback(this.result.replace(/data:image\/.*;base64,/,"")); };
-    //   reader.readAsDataURL(blob);
-    // });
   } catch (e) {
     // console.log(e);
     console.log('Cannot get base64 for '+imgSrc);
@@ -992,20 +1022,32 @@ cvox.DomUtil.getImageBase64 = async function(imgSrc) {
   }
 }
 
+/**
+ * Given an image url or base64 string, get the descriptive text of the image,
+ * either one MUST have values. The image will be submitted to the Gemini API,
+ * then return the result from Gemini as a string. 
+ * @param {String} url The image url. Can be null unless base64 is null.
+ * @param {String} base64 The image url. Can be null unless base64 is null.
+ * @return {String} The descriptive text of the image from Gemini.
+ */
 cvox.DomUtil.getImageCaption = async function(url, base64) {
-  // console.log(url);
+  var prefs = cvox.DomUtil.backgroundPrefs;
+  // console.log(prefs.geminiUrl);
   try {
     let body = { url, img: base64};
-    if (chrome.runtime.getManifest().tts_locale) {
-      body.lang = chrome.runtime.getManifest().tts_locale;
+    let headers = { "Content-Type": "application/json" };
+    let reqUrl = prefs.geminiUrl;
+    if (prefs.authKey && prefs.authKey!="") {
+      // headers["X-API-Key"] = prefs.authKey
+      reqUrl += '?key='+prefs.authKey;
     }
-    // const response = await fetch("https://us-central1-testproject-401009.cloudfunctions.net/api",
-    const response = await fetch(chrome.runtime.getManifest().gemini_api,
+    if (prefs.ttslang && prefs.ttslang!="") {
+      body.lang = prefs.ttslang;
+    }
+    const response = await fetch(reqUrl,//prefs.geminiUrl,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
+          headers: headers,
           body: JSON.stringify(body)
         }
     );
