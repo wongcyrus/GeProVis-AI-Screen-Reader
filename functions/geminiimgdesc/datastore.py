@@ -37,11 +37,10 @@ def save_image_caption_for_lang(hash: str, caption: str, lang: str):
     )
 
 
-def save_image_caption(hash: str, caption: str, lang: str, now: datetime):
-    # save_image_caption_for_lang(hash, caption, lang, now)
+def save_image_caption(hash: str, caption: str, lang: str, now: datetime = datetime.datetime.now()):   
     save_entity_to_datastore(
         "Caption",
-        hash,
+        hash + "->" + lang,
         {"caption": caption, "lang": lang, "time": now},
     )
 

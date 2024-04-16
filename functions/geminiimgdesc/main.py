@@ -104,6 +104,8 @@ def overloaded_response(headers):
 @functions_framework.http
 def geminiimgdesc(request):
     headers = handle_cors(request)
+    if not isinstance(headers, dict):
+        return headers
     request_json, request_args = get_request_data(request)
     user_id = get_user_id(request, request_args)
 
