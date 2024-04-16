@@ -1,6 +1,7 @@
 openpyxl
 functions-framework==3.*
 google-cloud-aiplatform
+google-cloud-api-keys
 google-cloud-translate
 google-cloud-datastore
 python-magic

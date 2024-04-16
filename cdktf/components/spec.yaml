@@ -63,6 +63,19 @@ paths:
       responses:
         '200':
           description: OK
+    options:
+      summary: Run Gemini (OPTIONS)
+      operationId: gemini-options-v1
+      x-google-backend:
+        address: ${GEMINI}
+        deadline: 300.0
+      consumes:
+        - application/json
+      produces:
+        - application/json        
+      responses:
+        '200':
+          description: OK
 
 securityDefinitions:
   api_key_query:

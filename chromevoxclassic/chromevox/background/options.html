@@ -122,6 +122,35 @@ found in the LICENSE file.
   <div id="keysContainer">
 
   </div>
+
+  <h2 class="i18n" msgid="options_gemini_api">Gemini API</h2>
+  <p class="i18n description" msgid="options_gemini_api_description" id="gemini_api_description">
+    Customizing the endpoint and authentication key of Gemini API
+  </p>
+
+  <div>
+    <div>
+      <input id="useGemini" type="checkbox" class="checkbox pref" name="useGemini" />
+      <label for="useGemini" class="i18n" msgid="options_use_gemini">
+        Enable Gemini API
+      </label>
+    </div>
+
+    <div>
+      <label>
+        <input type="text" class="pref" id="geminiUrl" name="geminiUrl">
+        <span class="i18n" msgid="options_geminiUrl">Endpoint URL of Gemini API</span>
+      </label>
+    </div>
+
+    <div>
+      <label>
+        <input type="text" class="pref" id="authKey" name="authKey">
+        <span class="i18n" msgid="options_authkey">Authentication Key</span>
+      </label>
+    </div>
+  </div>
+
   <div id="status" role="live" aria-live="assertive">
   </div>
 </div>

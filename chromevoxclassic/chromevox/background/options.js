@@ -341,6 +341,7 @@ cvox.OptionsPage.populateVoicesSelect = function() {
         var option = document.createElement('option');
         option.voiceName = voice.voiceName;
         option.innerText = option.voiceName;
+        option.lang = voice.lang;
         if (selectedVoiceName === voice.voiceName) {
           option.setAttribute('selected', '');
         }
@@ -356,6 +357,7 @@ cvox.OptionsPage.populateVoicesSelect = function() {
     var selIndex = select.selectedIndex;
     var sel = select.options[selIndex];
     chrome.storage.local.set({voiceName: sel.voiceName});
+    cvox.OptionsPage.prefs.setPref('ttslang', sel.lang);
   }, true);
 };
 
@@ -488,6 +490,8 @@ cvox.OptionsPage.eventListener = function(event) {
             cvox.OptionsPage.prefs.setPref(target.name, elements[i].value);
           }
         }
+      } else if (target.tagName == 'INPUT' && target.type == 'text') {
+        cvox.OptionsPage.prefs.setPref(target.name, target.value);
       }
     } else if (target.classList.contains('key')) {
       var keySeq = cvox.KeySequence.fromStr(target.value);
