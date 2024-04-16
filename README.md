@@ -33,12 +33,18 @@ We welcome any opinions or suggestions or pull request to help resolve these iss
 ## Setup procedure
 
 ### Frontend:
+#### Development setup
 1. Follow [original instruction](https://source.chromium.org/chromium/chromium/src/+/main:docs/windows_build_instructions.md) to checkout and build ChromeVox Classic
 2. Copy and replace all sources under [chromevoxclassic/](chromevoxclassic) to the chromium source under the path ui/accessibility/extensions/chromevoxclassic/
 3. After building the ChromeVox Classic browser extension, install the extension under Chrome browser with developer mode turned on
-4. Install with "Load unpacked"; the language of generated image description can be configured from the manifest.json by setting the lang code to the attribute "tts_locale", please refer [here](https://cloud.google.com/translate/docs/languages) for supported language codes
-5. The cloud function URL can be configured via the attribute "gemini_api" from the manifest.json
-6. Reinstall the browser extension after modifying the manifest.json
+
+#### Pre-built download
+You may download the [chromevox/build/aichromevox.zip](pre-built application) for the testing
+
+#### Usage and configuration
+1. Install with "Load unpacked"; the language of generated image description follows the current selected voices of the TTS
+2. The cloud function/API gateway URL can be configured via extension option page with the "Endpoint URL of Gemini API" under **Gemini API**
+3. The API Key can be input with "Authentication Key" under **Gemini API** from the extension option page, just leave it empty if no API key will be used
 
 ### Backend: 
 #### Manual (DEPRECIATED)
