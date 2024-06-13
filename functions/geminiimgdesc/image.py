@@ -65,12 +65,16 @@ def download_and_resize_image(url, max_size=3 * 1024 * 1024) -> str:
 def generate_image_description(image_bytes, lang: str, model_region: str):
     vertexai.init(location=model_region)
 
+    if lang == "zh-HK":
+        lang = "yue-HK"
+
     llm = ChatVertexAI(
         model_name=MODEL_NAME,
-        temperature=0.4,
-        max_output_tokens=40,
-        top_p=1,
-        top_k=32,
+        temperature=0,
+        max_output_tokens=2048,
+        top_p=0.4,
+        top_k=1,
+        streaming=True
     )
 
     image_message = {
@@ -81,10 +85,11 @@ def generate_image_description(image_bytes, lang: str, model_region: str):
     }
     text_message = {
         "type": "text",
-        "text": f"""Describes the image in less than 40 words in {lang}.""",
+        "text": f"""Describe the image, if a commodity is showing, then describe more about its shape and if it is a bottle, describe functions and features of its cap, if a chart is showing, read out all figures, if not showing a commodity or a chart, then describe more about its context with six W, in less than 40 words in {lang}.""",
     }
+    print(text_message)
     message = HumanMessage(content=[text_message, image_message])
-
+    print(message.content)
     output = llm([message])
     print(output.content)
     return output.content
