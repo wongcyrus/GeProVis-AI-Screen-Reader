@@ -283,16 +283,25 @@ cvox.ChromeVoxBackground.prototype.injectChromeVoxIntoTabs = function(tabs) {
   cvox.InjectedScriptLoader.fetchCode(listOfFiles, stageTwo);
 };
 
-
 /**
  * Called when a TTS message is received from a page content script.
  * @param {Object} msg The TTS message.
  */
 cvox.ChromeVoxBackground.prototype.onTtsMessage = function(msg) {
+  let pref = window['prefs'].getPrefs();
   if (msg['action'] == 'speak') {
+    if (pref['ttslang'] == 'zh-HK' && msg['text'].length > 60) {
+      const chunks = msg['text'].split(/[\uFF00-\uFFEF\u3000-\u303F ,<>;':"/?[\]{}()*&^%$#@!]/);
+      for (var i = 0; i < chunks.length; i++) {
+        this.tts.speak(chunks[i],
+                        msg['queueMode'],
+                        {'enqueue': true});
+      }
+    } else {
     this.tts.speak(msg['text'],
                    /** cvox.QueueMode */msg['queueMode'],
                    msg['properties']);
+    }
   } else if (msg['action'] == 'stop') {
     this.tts.stop();
   } else if (msg['action'] == 'increaseOrDecrease') {
@@ -327,7 +336,6 @@ cvox.ChromeVoxBackground.prototype.onTtsMessage = function(msg) {
                    cvox.QueueMode.FLUSH);
   }
 };
-
 
 /**
  * Called when an earcon message is received from a page content script.
