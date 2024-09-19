@@ -256,7 +256,7 @@ cvox.NavigationManager.prototype.resolve = async function(opt_predicate) {
     return true;
   }
 
-  var current = this.getCurrentNode();
+  var current = await this.getCurrentNode();
 
   if (!this.navigationHistory_.becomeInvalid(current)) {
     return true;
@@ -286,7 +286,7 @@ cvox.NavigationManager.prototype.resolve = async function(opt_predicate) {
   context = context || cvox.CursorSelection.fromBody();
   newSel.setReversed(this.isReversed());
 
-  this.updateSel(newSel, context);
+  await this.updateSel(newSel, context);
   this.recovered_ = true;
   return false;
 };
@@ -317,7 +317,7 @@ cvox.NavigationManager.prototype.setFocusRecovery = function(value) {
  * @private
  */
 cvox.NavigationManager.prototype.next_ = async function(iframes) {
-  if (this.tryBoundaries_(await this.shifter_.next(this.curSel_), iframes)) {
+  if (await this.tryBoundaries_(await this.shifter_.next(this.curSel_), iframes)) {
     // TODO(dtseng): An observer interface would help to keep logic like this
     // to a minimum.
     this.pageSel_ && this.pageSel_.extend(this.curSel_);
@@ -444,10 +444,10 @@ cvox.NavigationManager.prototype.togglePageSel = function() {
 cvox.NavigationManager.prototype.getDescription = async function() {
   // Handle description of special content. Consider moving to DescriptionUtil.
   // Specially annotated nodes.
-  if (this.getCurrentNode().hasAttribute &&
-      this.getCurrentNode().hasAttribute('cvoxnodedesc')) {
+  if (await this.getCurrentNode().hasAttribute &&
+      await this.getCurrentNode().hasAttribute('cvoxnodedesc')) {
     var preDesc = cvox.ChromeVoxJSON.parse(
-        this.getCurrentNode().getAttribute('cvoxnodedesc'));
+        await this.getCurrentNode().getAttribute('cvoxnodedesc'));
     var currentDesc = new Array();
     for (var i = 0; i < preDesc.length; ++i) {
       var inDesc = preDesc[i];
@@ -544,14 +544,14 @@ cvox.NavigationManager.prototype.performAction = async function(name) {
       if (this.shifterStack_.length == 0) {
         return false;
       }
-      this.updateSel(this.shifter_.performAction(name, this.curSel_));
+      await this.updateSel(this.shifter_.performAction(name, this.curSel_));
       this.shifter_ = this.shifterStack_.pop() || this.shifter_;
       await this.sync();
       this.exitedShifter_ = true;
       break;
       default:
         if (this.shifter_.hasAction(name)) {
-          return this.updateSel(
+          return await this.updateSel(
               this.shifter_.performAction(name, this.curSel_));
         } else {
           return false;
@@ -763,7 +763,7 @@ cvox.NavigationManager.prototype.finishNavCommand = async function(
 
   cvox.ChromeVox.braille.write(await this.getBraille());
 
-  this.updatePosition(this.getCurrentNode());
+  this.updatePosition(await this.getCurrentNode());
 };
 
 
@@ -780,7 +780,7 @@ cvox.NavigationManager.prototype.navigate = async function(
   this.pageEndAnnounced_ = false;
   if (this.pageEnd_) {
     this.pageEnd_ = false;
-    this.syncToBeginning(opt_ignoreIframes);
+    await this.syncToBeginning(opt_ignoreIframes);
     return true;
   }
   if (!(await this.resolve())) {
@@ -949,7 +949,13 @@ cvox.NavigationManager.prototype.setFocus = function(opt_skipText) {
  * Returns the node of the directed start of the selection.
  * @return {Node} The current node.
  */
-cvox.NavigationManager.prototype.getCurrentNode = function() {
+cvox.NavigationManager.prototype.getCurrentNode = async function() {
+  if (!this.curSel_) {
+    this.curSel_ = document.activeElement != document.body ?
+      /** @type {!cvox.CursorSelection} */
+      (cvox.CursorSelection.fromNode(document.activeElement)) :
+      await this.shifter_.begin(this.curSel_, {reversed: false});
+  }
   return this.curSel_.absStart().node;
 };
 
@@ -988,13 +994,13 @@ cvox.NavigationManager.prototype.addInterframeListener_ = function() {
         var reversed = message['reversed'];
         var granularity = message['granularity'];
         if (iframeElement) {
-          self.updateSel(cvox.CursorSelection.fromNode(iframeElement));
+          await self.updateSel(cvox.CursorSelection.fromNode(iframeElement));
         }
         self.setReversed(reversed);
         await self.sync();
         await self.navigate();
       } else {
-        self.syncToBeginning();
+        await self.syncToBeginning();
 
         // if we have an empty body, then immediately exit the iframe
         if (!(await cvox.DomUtil.hasContent(document.body))) {
@@ -1075,12 +1081,12 @@ cvox.NavigationManager.prototype.updateSelToArbitraryNode = async function(
     node, opt_precise) {
   if (node) {
     this.setGranularity(cvox.NavigationShifter.GRANULARITIES.OBJECT, true);
-    this.updateSel(cvox.CursorSelection.fromNode(node));
+    await this.updateSel(cvox.CursorSelection.fromNode(node));
     if (!opt_precise) {
       await this.sync();
     }
   } else {
-    this.syncToBeginning();
+    await this.syncToBeginning();
   }
 };
 
@@ -1093,13 +1099,13 @@ cvox.NavigationManager.prototype.updateSelToArbitraryNode = async function(
  * Used to override both curSel_ and prevSel_ when jumping back in nav history.
  * @return {boolean} False if sel is null. True otherwise.
  */
-cvox.NavigationManager.prototype.updateSel = function(sel, opt_context) {
+cvox.NavigationManager.prototype.updateSel = async function(sel, opt_context) {
   if (sel) {
     this.prevSel_ = opt_context || this.curSel_;
     this.curSel_ = sel;
   }
   // Only update the history if we aren't just trying to peek ahead.
-  var currentNode = this.getCurrentNode();
+  var currentNode = await this.getCurrentNode();
   this.navigationHistory_.update(currentNode);
   return !!sel;
 };
@@ -1130,20 +1136,20 @@ cvox.NavigationManager.prototype.isReversed = function() {
  * @return {boolean} False if end of page is reached.
  * @private
  */
-cvox.NavigationManager.prototype.tryBoundaries_ = function(sel, iframes) {
+cvox.NavigationManager.prototype.tryBoundaries_ = async function(sel, iframes) {
   iframes = (!!iframes && !this.ignoreIframesNoMatterWhat_) || false;
   this.pageEnd_ = false;
   if (iframes && this.tryIframe_(sel && sel.start.node)) {
     return true;
   }
   if (sel) {
-    this.updateSel(sel);
+    await this.updateSel(sel);
     return true;
   }
   if (this.shifterStack_.length > 0) {
     return true;
   }
-  this.syncToBeginning(!iframes);
+  await this.syncToBeginning(!iframes);
   this.clearPageSel(true);
   this.stopReading(true);
   this.pageEnd_ = true;
@@ -1218,14 +1224,14 @@ cvox.NavigationManager.prototype.tryIframe_ = function(node) {
  * requested.
  * @param {boolean=} opt_skipIframe True to skip iframes.
  */
-cvox.NavigationManager.prototype.syncToBeginning = function(opt_skipIframe) {
+cvox.NavigationManager.prototype.syncToBeginning = async function(opt_skipIframe) {
   var ret = this.shifter_.begin(this.curSel_, {
       reversed: this.curSel_.isReversed()
   });
   if (!opt_skipIframe && this.tryIframe_(ret && ret.start && ret.start.node)) {
     return;
   }
-  this.updateSel(ret);
+  await this.updateSel(ret);
 };
 
 

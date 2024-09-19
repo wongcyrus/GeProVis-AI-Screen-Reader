@@ -325,7 +325,7 @@ cvox.BrailleUtil.createValue = function(text, opt_selStart, opt_selEnd,
  * @param {number=} opt_displayPosition position of the display that the user
  *                  activated, relative to the start of braille.
  */
-cvox.BrailleUtil.click = function(braille, opt_displayPosition) {
+cvox.BrailleUtil.click = async function(braille, opt_displayPosition) {
   var handled = false;
   var spans = braille.text.getSpans(opt_displayPosition || 0);
   var node = spans.filter(function(n) { return n instanceof Node; })[0];
@@ -353,7 +353,7 @@ cvox.BrailleUtil.click = function(braille, opt_displayPosition) {
   }
   if (!handled) {
     cvox.DomUtil.clickElem(
-        node || cvox.ChromeVox.navigationManager.getCurrentNode(),
+        node || await cvox.ChromeVox.navigationManager.getCurrentNode(),
         false, false, false, true);
   }
 };

@@ -969,7 +969,7 @@ cvox.DomUtil.getImageTitle = async function(node) {
       }
     }
   }
-  console.log(text);
+  // console.log("getImageTitle: "+text);
   return text;
 };
 

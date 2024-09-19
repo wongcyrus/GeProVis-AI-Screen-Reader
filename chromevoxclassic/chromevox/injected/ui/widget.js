@@ -70,7 +70,7 @@ cvox.Widget.prototype.isActive = function() {
 /**
  * Visual/aural display of this widget.
  */
-cvox.Widget.prototype.show = function() {
+cvox.Widget.prototype.show = async function() {
   if (this.isActive()) {
     // Only one widget should be shown at any given time.
     this.hide(true);
@@ -81,7 +81,7 @@ cvox.Widget.prototype.show = function() {
   window.addEventListener('keypress', this.onKeyPress, true);
 
   this.initialNode =
-      cvox.ChromeVox.navigationManager.getCurrentNode();
+      await cvox.ChromeVox.navigationManager.getCurrentNode();
   this.initialFocus = document.activeElement;
 
   // Widgets do not respond to sticky key.

@@ -37,8 +37,8 @@ var extractMenuList_ = function(node) {
  * @private
  * @return {Node} Current element node.
  */
-var getCurrentElement_ = function() {
-  var currNode = cvox.ChromeVox.navigationManager.getCurrentNode();
+var getCurrentElement_ = async function() {
+  var currNode = await cvox.ChromeVox.navigationManager.getCurrentNode();
   while (currNode.nodeType !== Node.ELEMENT_NODE) {
     currNode = currNode.parentNode;
   }
@@ -105,10 +105,10 @@ cvox.ContextMenuWidget.prototype.getNameMsg = function() {
 /**
  * @override
  */
-cvox.ContextMenuWidget.prototype.onKeyDown = function(evt) {
+cvox.ContextMenuWidget.prototype.onKeyDown = async function(evt) {
   var ENTER_KEYCODE = 13;
   if (evt.keyCode == ENTER_KEYCODE) {
-    var currentNode = cvox.ChromeVox.navigationManager.getCurrentNode();
+    var currentNode = await cvox.ChromeVox.navigationManager.getCurrentNode();
     var cmd = currentNode.parentNode.id;
 
     /* Dispatch the event. */

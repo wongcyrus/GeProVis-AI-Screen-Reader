@@ -291,14 +291,15 @@ cvox.ChromeVoxBackground.prototype.onTtsMessage = function(msg) {
   let pref = window['prefs'].getPrefs();
   if (msg['action'] == 'speak') {
     if (pref['ttslang'] == 'zh-HK' && msg['text'].length > 60) {
-      const chunks = msg['text'].split(/[\uFF00-\uFFEF\u3000-\u303F ,<>;':"/?[\]{}()*&^%$#@!]/);
+      // const chunks = msg['text'].split(/[\uFF00-\uFFEF\u3000-\u303F ,<>;':"/?[\]{}()*&^%$#@!]/);
+      const chunks = msg['text'].split(/[\uFF00-\uFFEF\u3000-\u303F ,<>;':"/?[\]{}()*&^#@!]/);
       for (var i = 0; i < chunks.length; i++) {
         this.tts.speak(chunks[i],
-                        msg['queueMode'],
-                        {'enqueue': true});
+                        /*msg['queueMode']*/cvox.QueueMode.QUEUE,
+                        /*{'enqueue': true}*/msg['properties']);
       }
     } else {
-    this.tts.speak(msg['text'],
+      this.tts.speak(msg['text'],
                    /** cvox.QueueMode */msg['queueMode'],
                    msg['properties']);
     }
@@ -352,7 +353,7 @@ cvox.ChromeVoxBackground.prototype.onEarconMessage = function(msg) {
  * Listen for connections from our content script bridges, and dispatch the
  * messages to the proper destination.
  */
-cvox.ChromeVoxBackground.prototype.addBridgeListener = function() {
+cvox.ChromeVoxBackground.prototype.addBridgeListener = function() { 
   cvox.ExtensionBridge.addMessageListener(goog.bind(function(msg, port) {
     var target = msg['target'];
     var action = msg['action'];

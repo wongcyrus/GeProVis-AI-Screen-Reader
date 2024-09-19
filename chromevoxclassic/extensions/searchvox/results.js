@@ -25,13 +25,13 @@ cvox.SearchResults = function() {
  * @param {Node} result Search result to be spoken.
  * @param {Array} selectTexts Array of selectors or text to speak.
  */
-cvox.SearchResults.speakResultBySelectTexts = function(result, selectTexts) {
+cvox.SearchResults.speakResultBySelectTexts = async function(result, selectTexts) {
   for (var j = 0; j < selectTexts.length; j++) {
     var selectText = selectTexts[j];
     if (selectText.select) {
       var elems = result.querySelectorAll(selectText.select);
       for (var i = 0; i < elems.length; i++) {
-        cvox.ChromeVox.speakNode(elems.item(i), cvox.QueueMode.QUEUE);
+        await cvox.ChromeVox.speakNode(elems.item(i), cvox.QueueMode.QUEUE);
       }
     }
     if (selectText.text) {
@@ -71,7 +71,7 @@ cvox.NormalResult.prototype.isType = function(result) {
  * Speak a normal search result.
  * @override
  */
-cvox.NormalResult.prototype.speak = function(result) {
+cvox.NormalResult.prototype.speak = async function(result) {
   if (!result) {
     return false;
   }
@@ -96,8 +96,8 @@ cvox.NormalResult.prototype.speak = function(result) {
   var discussTitles = result.querySelectorAll(DISCUSS_TITLE_SELECT);
   var discussDates = result.querySelectorAll(DISCUSS_DATE_SELECT);
   for (var i = 0; i < discussTitles.length; i++) {
-    cvox.ChromeVox.speakNode(discussTitles.item(i), cvox.QueueMode.QUEUE);
-    cvox.ChromeVox.speakNode(discussDates.item(i), cvox.QueueMode.QUEUE);
+    await cvox.ChromeVox.speakNode(discussTitles.item(i), cvox.QueueMode.QUEUE);
+    await cvox.ChromeVox.speakNode(discussDates.item(i), cvox.QueueMode.QUEUE);
   }
   return true;
 };
@@ -213,8 +213,8 @@ cvox.KnowResult.prototype.isType = function(result) {
  * Speak a knowledge panel search result.
  * @override
  */
-cvox.KnowResult.prototype.speak = function(result) {
-  cvox.ChromeVox.speakNode(result, cvox.QueueMode.QUEUE);
+cvox.KnowResult.prototype.speak = async function(result) {
+  await cvox.ChromeVox.speakNode(result, cvox.QueueMode.QUEUE);
   return true;
 };
 
@@ -369,13 +369,13 @@ cvox.CategoryResult.prototype.isType = function(result) {
  * Speak a category result.
  * @override
  */
-cvox.CategoryResult.prototype.speak = function(result) {
+cvox.CategoryResult.prototype.speak = async function(result) {
   if (!result) {
     return false;
   }
   var LABEL_SELECT = '.rg_bb_label';
   var label = result.querySelector(LABEL_SELECT);
-  cvox.ChromeVox.speakNode(label, cvox.QueueMode.QUEUE);
+  await cvox.ChromeVox.speakNode(label, cvox.QueueMode.QUEUE);
   return true;
 };
 

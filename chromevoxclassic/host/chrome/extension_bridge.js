@@ -238,7 +238,7 @@ cvox.ExtensionBridge.setupBackgroundPort = function() {
   if (!self.backgroundPort) {
     return;
   }
-  self.backgroundPort.onMessage.addListener(function(message) {
+  self.backgroundPort.onMessage.addListener(function(message) { 
     if (message[cvox.ExtensionBridge.PONG_MSG]) {
       self.gotPongFromBackgroundPage(
           message[cvox.ExtensionBridge.PONG_MSG]);

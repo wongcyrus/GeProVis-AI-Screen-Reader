@@ -137,7 +137,7 @@ function setupEndCallback_(properties, callbackId) {
  * @param {Object=} properties Speech properties to use for this utterance.
  */
 cvox.ApiImplementation.speak = function(
-    callbackId, textString, queueMode, properties) {
+    callbackId, textString, queueMode, properties) { 
   if (cvox.ChromeVox.isActive) {
     if (!properties) {
       properties = {};
@@ -156,10 +156,10 @@ cvox.ApiImplementation.speak = function(
  * @param {number=} queueMode Valid modes are 0 for flush; 1 for queue.
  * @param {Object=} properties Speech properties to use for this utterance.
  */
-cvox.ApiImplementation.speakNode = function(node, queueMode, properties) {
+cvox.ApiImplementation.speakNode = async function(node, queueMode, properties) {
   if (cvox.ChromeVox.isActive) {
     cvox.ChromeVox.tts.speak(
-        cvox.DomUtil.getName(node),
+        await cvox.DomUtil.getName(node),
         /** @type {cvox.QueueMode} */ (queueMode),
         properties);
   }
@@ -173,14 +173,14 @@ cvox.ApiImplementation.speakNode = function(node, queueMode, properties) {
  * @param {number=} queueMode Valid modes are 0 for flush; 1 for queue.
  * @param {Object=} properties Speech properties to use for this utterance.
  */
-cvox.ApiImplementation.speakNodeRef = function(
+cvox.ApiImplementation.speakNodeRef = async function(
     callbackId, nodeRef, queueMode, properties) {
   var node = cvox.ApiUtils.getNodeFromRef(nodeRef);
   if (!properties) {
     properties = {};
   }
   setupEndCallback_(properties, callbackId);
-  cvox.ApiImplementation.speakNode(node, queueMode, properties);
+  await cvox.ApiImplementation.speakNode(node, queueMode, properties);
 };
 
 /**
@@ -264,8 +264,8 @@ cvox.ApiImplementation.syncToNode = async function(
  * Get the current node that ChromeVox is on.
  * @param {number} callbackId The callback Id.
  */
-cvox.ApiImplementation.getCurrentNode = function(callbackId) {
-  var currentNode = cvox.ChromeVox.navigationManager.getCurrentNode();
+cvox.ApiImplementation.getCurrentNode = async function(callbackId) {
+  var currentNode = await cvox.ChromeVox.navigationManager.getCurrentNode();
   cvox.ApiImplementation.port.postMessage(cvox.ChromeVoxJSON.stringify(
       {
         'id': callbackId,

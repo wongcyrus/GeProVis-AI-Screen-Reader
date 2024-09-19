@@ -234,13 +234,13 @@ if (typeof(goog) != 'undefined' && goog.require) {
     * @param {number=} queueMode Valid modes are 0 for flush; 1 for queue.
     * @param {Object=} properties Speech properties to use for this utterance.
     */
-   cvox.Api.speakNode = function(targetNode, queueMode, properties) {
+   cvox.Api.speakNode = async function(targetNode, queueMode, properties) {
      if (!cvox.Api.isChromeVoxActive()) {
        return;
      }
 
      if (implementation) {
-       implementation.speak(cvox.DomUtil.getName(targetNode),
+       implementation.speak(await cvox.DomUtil.getName(targetNode),
            queueMode, properties);
      } else {
        var message = {
@@ -341,13 +341,13 @@ if (typeof(goog) != 'undefined' && goog.require) {
     *
     * @param {Function} callback The function to be called.
     */
-   cvox.Api.getCurrentNode = function(callback) {
+   cvox.Api.getCurrentNode = async function(callback) {
      if (!cvox.Api.isChromeVoxActive() || !callback) {
        return;
      }
 
      if (implementation) {
-       callback(cvox.ChromeVox.navigationManager.getCurrentNode());
+       callback(await cvox.ChromeVox.navigationManager.getCurrentNode());
      } else {
        callAsync_({'cmd': 'getCurrentNode'}, function(response) {
          callback(cvox.ApiUtils.getNodeFromRef(response['currentNode']));
