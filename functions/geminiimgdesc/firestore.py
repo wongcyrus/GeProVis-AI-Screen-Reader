@@ -4,14 +4,14 @@ from google.cloud import firestore
 
 
 def get_entity_from_firestore(collection: str, document_id: str):
-    client = firestore.Client()
+    client = firestore.Client(database="aireader")
     doc_ref = client.collection(collection).document(document_id)
     doc = doc_ref.get()
     return doc.to_dict() if doc.exists else None
 
 
 def save_entity_to_firestore(collection: str, document_id: str, data: dict):
-    client = firestore.Client()
+    client = firestore.Client(database="aireader")
     doc_ref = client.collection(collection).document(document_id)
     doc_ref.set(data)
 
@@ -83,7 +83,7 @@ def save_data(user_id, hash, ret_text, locale, model_region):
 
 
 def get_usages_by_user_id(user_id: str):
-    client = firestore.Client()
+    client = firestore.Client(database="aireader")
     user_query = client.collection("Usage").where("user_id", "==", str(user_id)).where(
         "time", ">", datetime.datetime.now() - datetime.timedelta(days=1)
     )
@@ -96,7 +96,7 @@ def get_usages_by_user_id(user_id: str):
 
 
 def get_usages_by_region(region: str):
-    client = firestore.Client()
+    client = firestore.Client(database="aireader")
     region_query = client.collection("Usage").where("model_region", "==", region).where(
         "time", ">", datetime.datetime.now() - datetime.timedelta(minutes=1)
     )

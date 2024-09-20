@@ -3,7 +3,7 @@ functions-framework==3.*
 google-cloud-aiplatform
 google-cloud-api-keys
 google-cloud-translate
-google-cloud-datastore
+google-cloud-firestore
 python-magic
 langchain
 langsmith

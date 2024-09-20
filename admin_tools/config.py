@@ -1,2 +1,2 @@
-project_id="gemini-screen-reader"
-api="geminiimagerunnerapi-3up2zn0a192td.apigateway.gemini-screen-reader.cloud.goog"
+project_id="gemini-screen-reader-v2"
+api="geminiimagerunnerapi-2gcds5jztq2l2.apigateway.gemini-screen-reader-v2.cloud.goog"
