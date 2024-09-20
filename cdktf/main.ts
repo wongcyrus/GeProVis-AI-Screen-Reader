@@ -1,21 +1,19 @@
 import { Construct } from "constructs";
 import { App, TerraformOutput, TerraformStack } from "cdktf";
 import { ArchiveProvider } from "./.gen/providers/archive/provider";
-import { RandomProvider } from "./.gen/providers/random/provider";
-import { DataGoogleBillingAccount } from "./.gen/providers/google-beta/data-google-billing-account";
-import { GoogleDatastoreIndex } from "./.gen/providers/google-beta/google-datastore-index";
-
+import { RandomProvider } from "./.gen/providers/random/provider/index";
+import { DataGoogleBillingAccount } from "./.gen/providers/google-beta/data-google-billing-account/index";
 
 import { GoogleBetaProvider } from "./.gen/providers/google-beta/provider/index";
-import { GoogleProject } from "./.gen/providers/google-beta/google-project";
+import { GoogleProject } from "./.gen/providers/google-beta/google-project/index";
 import { CloudFunctionDeploymentConstruct } from "./components/cloud-function-deployment-construct";
 import { CloudFunctionConstruct } from "./components/cloud-function-construct";
 
 import * as dotenv from 'dotenv';
 import { ApigatewayConstruct } from "./components/api-gateway-construct";
-import { DatastoreConstruct } from "./components/datastore-construct";
 import { GoogleProjectIamMember } from "./.gen/providers/google-beta/google-project-iam-member";
-import { GoogleProjectService } from "./.gen/providers/google-beta/google-project-service";
+import { GoogleProjectService } from "./.gen/providers/google-beta/google-project-service/index";
+import { FirestoreConstruct } from "./components/firestore-construct";
 dotenv.config();
 
 class GeminiReaderRunnerStack extends TerraformStack {
@@ -41,7 +39,7 @@ class GeminiReaderRunnerStack extends TerraformStack {
       projectId: projectId,
       name: projectId,
       billingAccount: billingAccount.id,
-      skipDelete: false
+      deletionPolicy: "DELETE",
     });
 
     const cloudFunctionDeploymentConstruct =
@@ -77,44 +75,11 @@ class GeminiReaderRunnerStack extends TerraformStack {
         "LANGCHAIN_TRACING_V2": process.env.LANGCHAIN_TRACING_V2!,
         "LANGCHAIN_API_KEY": process.env.LANGCHAIN_API_KEY!,
       },
-    });  
+    });
 
-    await DatastoreConstruct.create(this, " geminiImgDescDatastore", {
+    await FirestoreConstruct.create(this, " geminiImgDescDatastore", {
       project: project.projectId,
       servicesAccount: geminiImgDescCloudFunctionConstruct.serviceAccount,
-    });
-
-    new GoogleDatastoreIndex(this, "google_datastore_index", {
-      project: project.projectId,
-      kind: "Usage",
-      properties: [
-        {
-          name: "user_id",
-          direction: "ASCENDING",
-        },
-        {
-          name: "time",
-          direction: "DESCENDING",
-        },
-        {
-          name: "cost",
-          direction: "DESCENDING",
-        },
-      ],
-    });
-    new GoogleDatastoreIndex(this, "google_datastore_index_2", {
-      project: project.projectId,
-      kind: "Usage",
-      properties: [
-        {
-          name: "model_region",
-          direction: "ASCENDING",
-        },
-        {
-          name: "time",
-          direction: "DESCENDING",
-        }
-      ],
     });
 
     new GoogleProjectIamMember(this, "AiplatformProjectIamMember", {
@@ -122,7 +87,7 @@ class GeminiReaderRunnerStack extends TerraformStack {
       role: "roles/aiplatform.user",
       member: "serviceAccount:" + geminiImgDescCloudFunctionConstruct.serviceAccount.email,
     });
-    
+
     new GoogleProjectIamMember(this, "CloudtranslateProjectIamMember", {
       project: project.id,
       role: "roles/cloudtranslate.user",
