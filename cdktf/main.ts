@@ -58,7 +58,13 @@ class GeminiReaderRunnerStack extends TerraformStack {
     cloudFunctionDeploymentConstruct.services.push(translateService);
 
     //For the first deployment, it takes a while for API to be enabled.
-    await new Promise(r => setTimeout(r, 30000));
+    // await new Promise(r => setTimeout(r, 30000));
+
+    new GoogleProjectService(this, "aiplatform", {
+      project: project.projectId,
+      service: "aiplatform.googleapis.com",
+      disableOnDestroy: false,
+    });
 
     const geminiImgDescCloudFunctionConstruct = await CloudFunctionConstruct.create(this, "geminiImgDescCloudFunctionConstruct", {
       functionName: "geminiimgdesc",

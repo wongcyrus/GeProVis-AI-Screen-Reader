@@ -149,6 +149,3 @@ if __name__ == "__main__":
         add_api_key_to_firestore(project_id, key.key_string, student["id"], key.uid, student["name"])
         print(key)
     print("done")
-
-    add_api_key_to_firestore(project_id, "dsfdasfas",
-                             "123456", "fsafasfsafa", "student")

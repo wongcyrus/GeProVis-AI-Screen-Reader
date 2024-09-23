@@ -27,7 +27,7 @@ export class FirestoreConstruct extends Construct {
                 disableOnDestroy: false,
             }));
         }
-        
+
         const googleFirestoreDatabase = new GoogleFirestoreDatabase(this, "firestore", {
             project: props.project,
             name: "aireader",
@@ -37,8 +37,8 @@ export class FirestoreConstruct extends Construct {
             deletionPolicy: "DELETE",
             dependsOn: services,
         });
-
-        new GoogleFirestoreIndex(this, "google_datastore_index", {
+      
+        new GoogleFirestoreIndex(this, "google_datastore_index_user", {
             project: props.project,
             database: googleFirestoreDatabase.name,
             collection: "Usage",
@@ -49,16 +49,17 @@ export class FirestoreConstruct extends Construct {
                 },
                 {
                     fieldPath: "time",
-                    order: "DESCENDING",
+                    order: "ASCENDING",
                 },
                 {
-                    fieldPath: "cost",
-                    order: "DESCENDING",
+                    fieldPath: "__name__",
+                    order: "ASCENDING",
                 },
             ],
             dependsOn: services,
         });
-        new GoogleFirestoreIndex(this, "google_datastore_index_2", {
+
+        new GoogleFirestoreIndex(this, "google_datastore_index_region", {
             project: props.project,
             database: googleFirestoreDatabase.name,
             collection: "Usage",
@@ -69,7 +70,7 @@ export class FirestoreConstruct extends Construct {
                 },
                 {
                     fieldPath: "time",
-                    order: "DESCENDING",
+                    order: "ASCENDING",
                 }
             ],
             dependsOn: services,

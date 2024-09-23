@@ -1,4 +1,3 @@
-import os
 import datetime
 from google.cloud import firestore
 
@@ -17,7 +16,7 @@ def save_entity_to_firestore(collection: str, document_id: str, data: dict):
 
 
 def get_user_id_by_api_key(key: str) -> str:
-    user = get_entity_from_firestore("ApiKey", key)
+    user = get_entity_from_firestore("ApiKeys", key)
     return str(user["user_id"]) if user else None
 
 

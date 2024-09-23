@@ -55,7 +55,7 @@ def save_usages_to_xlsx(usages):
 
 
 if __name__ == "__main__":
-    # usages = get_all_usages()
-    # print(len(usages))
-    # save_usages_to_xlsx(usages)
-    get_usages_by_region()
+    usages = get_all_usages()
+    print(len(usages))
+    save_usages_to_xlsx(usages)
+    # get_usages_by_region()
