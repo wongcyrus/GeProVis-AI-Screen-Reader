@@ -20,7 +20,7 @@ for url in urls:
         .replace("=", "%3D")
         .replace("&", "%26")
     )
-    api_url = f"https://gateway-82i2827l.ue.gateway.dev/gemini?url={url}"
+    api_url = f"https://gateway-5o6p2is6.ue.gateway.dev/gemini?url={url}"
     payload = json.dumps({"lang": "zh-CN"})
     headers = {"Content-Type": "application/json", "X-API-Key": os.environ["api_key"]}
     response = requests.request("POST", api_url, headers=headers, data=payload)

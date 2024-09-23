@@ -4,7 +4,7 @@ from time import sleep
 import functions_framework
 import hashlib
 
-from .datastore import (
+from .firestore import (
     get_usages_by_region,
     get_user_id_by_api_key,
     get_image_caption,

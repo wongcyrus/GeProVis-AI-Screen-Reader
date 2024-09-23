@@ -1,18 +1,43 @@
 import datetime
-from google.cloud import datastore
+from google.cloud import firestore
 from config import project_id
-from google.cloud.datastore.query import BaseCompositeFilter, PropertyFilter
 import os
 
-
 def get_all_usages():
-    client = datastore.Client(project=project_id)
-    query = client.query(kind="Usage")
-    query.order = ["time"]
-    results = list(query.fetch())
+    client = firestore.Client(project=project_id, database="aireader")
+    usages_ref = client.collection("Usage")
+    query = usages_ref.order_by("time")
+    results = [doc.to_dict() for doc in query.stream()]
 
     return results
 
+def get_usages_by_user_id():
+    client = firestore.Client(project=project_id, database="aireader")
+    usages_ref = client.collection("Usage")
+
+    query = usages_ref.where("user_id", "==", str(100)).where(
+        "time", ">", datetime.datetime.now() - datetime.timedelta(days=1)
+    )
+
+    total_cost = 0
+    for doc in query.stream():
+        total_cost += doc.to_dict().get("cost", 0)
+
+    print(total_cost)
+    return total_cost
+
+def get_usages_by_region():
+    client = firestore.Client(project=project_id, database="aireader")
+    usages_ref = client.collection("Usage")
+
+    query = usages_ref.where("model_region", "==", "europe-west3").where(
+        "time", ">", datetime.datetime.now() - datetime.timedelta(days=1)
+    )
+
+    count = sum(1 for _ in query.stream())
+
+    print(count)
+    return count
 
 def save_usages_to_xlsx(usages):
     from openpyxl import Workbook
@@ -28,64 +53,9 @@ def save_usages_to_xlsx(usages):
     wb.save(os.path.join(current_directory, "usage.xlsx"))
 
 
-def get_usages_by_user_id():
-    client = datastore.Client(project=project_id)
-    user_query = client.query(kind="Usage")
-
-    user_query.add_filter(
-        filter=BaseCompositeFilter(
-            "AND",
-            [
-                PropertyFilter("user_id", "=", str(100)),
-                PropertyFilter(
-                    "time", ">", datetime.datetime.now() - datetime.timedelta(days=1)
-                ),
-            ],
-        )
-    )
-
-    user_cost_query = client.aggregation_query(query=user_query).sum(
-        property_ref="cost", alias="total_cost_over_1_day"
-    )
-
-    data  = list(user_cost_query.fetch())
-    user_cost_query_result = data[0][0] if len(data) == 1 else 0
-    print(user_cost_query_result.value)
-    # for aggregation_results in user_cost_query_result:
-    #     for aggregation_result in aggregation_results:
-    #         if aggregation_result.alias == "total_cost_over_1_day":
-    #             print(
-    #                 f"Total sum of hours in completed tasks is {aggregation_result.value}"
-    #             )
-    # print(results)
-    # return results
-
-def get_usages_by_region():
-    client = datastore.Client(project=project_id)
-    user_query = client.query(kind="Usage")
-
-    user_query.add_filter(
-        filter=BaseCompositeFilter(
-            "AND",
-            [
-                PropertyFilter("model_region", "=", "europe-west3"),
-                PropertyFilter(
-                    "time", ">", datetime.datetime.now() - datetime.timedelta(days=1)
-                ),
-            ],
-        )
-    )
-
-    region_query = client.aggregation_query(query=user_query).count(
-        alias="call_over_1_minute"
-    )
-
-    data  = list(region_query.fetch())
-    region_query_query_result = data[0][0] if len(data) == 1 else 0
-    print(region_query_query_result.value)
 
 if __name__ == "__main__":
-    # usages = get_all_usages()
-    # print(len(usages))
-    # save_usages_to_xlsx(usages)
-    get_usages_by_region()
+    usages = get_all_usages()
+    print(len(usages))
+    save_usages_to_xlsx(usages)
+    # get_usages_by_region()

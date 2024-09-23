@@ -41,7 +41,7 @@ export class CloudFunctionConstruct extends Construct {
             this.serviceAccount = new GoogleServiceAccount(this, "service-account", {
                 accountId: accountId,
                 project: props.cloudFunctionDeploymentConstruct.project,
-                displayName: props.functionName + props.entryPoint ?? "",
+                displayName: props.functionName + (props.entryPoint ?? ""),
             });
         }
         this.props = props;

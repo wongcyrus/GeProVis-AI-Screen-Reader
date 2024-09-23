@@ -1,21 +1,24 @@
 from google.cloud import api_keys_v2
 from google.cloud.api_keys_v2 import Key
 
-from google.cloud import datastore
+from google.cloud import firestore
 from config import project_id, api
 
-def add_api_key_to_datastore(project_id: str,key: str, user_id:str,key_id:str, name:str) -> None:
-    client = datastore.Client(project=project_id)
-    key = client.key('ApiKey', key)
-    entity = datastore.Entity(key=key)
-    entity.update({
+from google.cloud import firestore
+
+
+def add_api_key_to_firestore(project_id: str, key: str, user_id: str, key_id: str, name: str) -> None:
+    client = firestore.Client(project=project_id, database="aireader")
+    doc_ref = client.collection('ApiKeys').document(key)
+    doc_ref.set({
+        'key': key,
         'user_id': user_id,
         'key_id': key_id,
-        'name'  : name
+        'name': name
     })
-    client.put(entity)
 
-def create_api_key(project_id: str, id:str,name: str) -> Key:
+
+def create_api_key(project_id: str, id: str, name: str) -> Key:
     """
     Creates and restrict an API key. Add the suffix for uniqueness.
 
@@ -50,7 +53,8 @@ def create_api_key(project_id: str, id:str,name: str) -> Key:
     # To restrict the usage of this API key, use the value in "response.name".
     return response
 
-def restrict_api_key_api(project_id: str, service:str, key_id: str) -> Key:
+
+def restrict_api_key_api(project_id: str, service: str, key_id: str) -> Key:
     """
     Restricts an API key. Restrictions specify which APIs can be called using the API key.
 
@@ -97,39 +101,43 @@ def restrict_api_key_api(project_id: str, service:str, key_id: str) -> Key:
     # Use response.key_string to authenticate.
     return response
 
+
 def get_students_from_excel() -> list:
     from openpyxl import load_workbook
-    wb = load_workbook(filename = 'Namelist.xlsx')
+    wb = load_workbook(filename='Namelist.xlsx')
     sheet = wb.active
     students = []
     for row in sheet.iter_rows(min_row=2, max_col=2):
-        id =""
+        id = ""
         name = ""
-        for cell in row:            
+        for cell in row:
             if cell.column == 1:
                 id = cell.value
             if cell.column == 2:
                 name = cell.value
-        students.append({"id":id,"name":name})
+        students.append({"id": id, "name": name})
     return students
 
+
 def get_all_api_keys():
-    client = datastore.Client(project=project_id)
-    query = client.query(kind="ApiKey")
-    query.order = ["user_id"]
-    results = list(query.fetch())    
+    client = firestore.Client(project=project_id, database="aireader")
+    api_keys_ref = client.collection("ApiKeys")
+    query = api_keys_ref.order_by("user_id")
+    results = [doc.to_dict() for doc in query.stream()]
+    print(results)
     return results
 
-if __name__ == "__main__":  
+
+if __name__ == "__main__":
     # user_id = "123456789"
     # key = create_api_key(project_id, "studentid-" + user_id ,"cywong@vtc.edu.hk")
-    # print(key)   
+    # print(key)
     # response = restrict_api_key_api(project_id, api, key.uid)
-    # print(response) 
-    # add_api_key_to_datastore(project_id, key.key_string, user_id, key.uid)
+    # print(response)
+    # add_api_key_to_firestore(project_id, key.key_string, user_id, key.uid)
 
-    existing_keys = get_all_api_keys()   
-    existing_user_ids = list(map(lambda x: str(x["user_id"]),existing_keys))    
+    existing_keys = get_all_api_keys()
+    existing_user_ids = list(map(lambda x: str(x["user_id"]),existing_keys))
 
     students = get_students_from_excel()
     for student in students:
@@ -138,8 +146,6 @@ if __name__ == "__main__":
             continue
         key = create_api_key(project_id, "studentid-" + str(student["id"]) ,student["name"])
         response = restrict_api_key_api(project_id, api, key.uid)
-        add_api_key_to_datastore(project_id, key.key_string, student["id"], key.uid, student["name"])        
+        add_api_key_to_firestore(project_id, key.key_string, student["id"], key.uid, student["name"])
         print(key)
     print("done")
-                
-    
