@@ -503,7 +503,7 @@ cvox.ChromeVoxEventWatcher.mutationHandler = function(mutations) {
  * @param {Event} evt The mouseclick event to process.
  * @return {boolean} True if the default action should be performed.
  */
-cvox.ChromeVoxEventWatcher.mouseClickEventWatcher = function(evt) {
+cvox.ChromeVoxEventWatcher.mouseClickEventWatcher = async function(evt) {
   if (evt.fromCvox) {
     return true;
   }
@@ -518,12 +518,12 @@ cvox.ChromeVoxEventWatcher.mouseClickEventWatcher = function(evt) {
     // Failing to restore focus before clicking can cause odd problems such as
     // the soft IME not coming up in Android (it only shows up if the click
     // happens in a focused text field).
-    cvox.Focuser.setFocus(cvox.ChromeVox.navigationManager.getCurrentNode());
+    cvox.Focuser.setFocus(await cvox.ChromeVox.navigationManager.getCurrentNode());
     cvox.ChromeVox.tts.speak(
         Msgs.getMsg('element_clicked'),
         cvox.ChromeVoxEventWatcher.queueMode_(),
         cvox.AbstractTts.PERSONALITY_ANNOTATION);
-    var targetNode = cvox.ChromeVox.navigationManager.getCurrentNode();
+    var targetNode = await cvox.ChromeVox.navigationManager.getCurrentNode();
     // If the targetNode has a defined onclick function, just call it directly
     // rather than try to generate a click event and dispatching it.
     // While both work equally well on standalone Chrome, when dealing with
@@ -969,7 +969,7 @@ cvox.ChromeVoxEventWatcher.speakLiveRegion_ = function(
  * Sets up the text handler.
  * @return {boolean} True if an editable text control has focus.
  */
-cvox.ChromeVoxEventWatcher.setUpTextHandler = function() {
+cvox.ChromeVoxEventWatcher.setUpTextHandler = async function() {
   var currentFocus = document.activeElement;
   if (currentFocus &&
       currentFocus.hasAttribute &&
@@ -1036,7 +1036,7 @@ cvox.ChromeVoxEventWatcher.setUpTextHandler = function() {
             }));
       }
       if (!cvox.ChromeVoxEventSuspender.areEventsSuspended()) {
-        cvox.ChromeVox.navigationManager.updateSel(
+        await cvox.ChromeVox.navigationManager.updateSel(
             cvox.CursorSelection.fromNode(
                 cvox.ChromeVoxEventWatcher.currentTextControl));
       }

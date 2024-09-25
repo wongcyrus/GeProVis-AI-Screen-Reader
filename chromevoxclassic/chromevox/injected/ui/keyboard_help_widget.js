@@ -69,10 +69,10 @@ cvox.KeyboardHelpWidget.prototype.getNameMsg = function() {
 /**
  * @override
  */
-cvox.KeyboardHelpWidget.prototype.onKeyDown = function(evt) {
+cvox.KeyboardHelpWidget.prototype.onKeyDown = async function(evt) {
   if (evt.keyCode == 13) { // Enter
     var currentCommand =
-        cvox.ChromeVox.navigationManager.getCurrentNode().parentNode.id;
+        await cvox.ChromeVox.navigationManager.getCurrentNode().parentNode.id;
     this.hide();
     cvox.ChromeVoxEventSuspender.withSuspendedEvents(
         cvox.ChromeVoxUserCommands.commands[currentCommand])();

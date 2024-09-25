@@ -47,9 +47,9 @@ cvox.NodeBreadcrumb.NEEDED_TAG_ = 'chromevoxneeded';
  * Tags the current node.
  * @return {number} The tag number.
  */
-cvox.NodeBreadcrumb.prototype.tagCurrentNode = function() {
+cvox.NodeBreadcrumb.prototype.tagCurrentNode = async function() {
   var cvTag;
-  var currentNode = cvox.ChromeVox.navigationManager.getCurrentNode();
+  var currentNode = await cvox.ChromeVox.navigationManager.getCurrentNode();
   while (currentNode && !currentNode.hasAttribute) {
       currentNode = currentNode.parentNode;
   }
@@ -154,8 +154,8 @@ cvox.NodeBreadcrumb.prototype.dumpWalkedDom = function() {
  *
  * @return {number} The ChromeVox tag or -1 if there is an error.
  */
-cvox.NodeBreadcrumb.getCurrentNodeTag = function() {
-  var currentNode = cvox.ChromeVox.navigationManager.getCurrentNode();
+cvox.NodeBreadcrumb.getCurrentNodeTag = async function() {
+  var currentNode = await cvox.ChromeVox.navigationManager.getCurrentNode();
   while (currentNode && !currentNode.hasAttribute) {
       currentNode = currentNode.parentNode;
   }

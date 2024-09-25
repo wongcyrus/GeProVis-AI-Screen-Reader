@@ -134,8 +134,8 @@ cvox.ChromeVoxUserCommands.handleTabAction_ = async function() {
     cvox.ChromeVoxUserCommands.wasMouseClicked = false;
   }
   if (sel == null || sel.anchorNode == null || sel.focusNode == null) {
-    anchorNode = cvox.ChromeVox.navigationManager.getCurrentNode();
-    focusNode = cvox.ChromeVox.navigationManager.getCurrentNode();
+    anchorNode = await cvox.ChromeVox.navigationManager.getCurrentNode();
+    focusNode = await cvox.ChromeVox.navigationManager.getCurrentNode();
   } else {
     anchorNode = sel.anchorNode;
     focusNode = sel.focusNode;
@@ -232,7 +232,7 @@ cvox.ChromeVoxUserCommands.dispatchCommand_ = async function(cmdStruct) {
       (cvox.UserEventDetail.JUMP_COMMANDS.indexOf(cmdStruct.command) != -1)) {
     var detail = new cvox.UserEventDetail({command: cmdStruct.command});
     var evt = detail.createEventObject();
-    var currentNode = cvox.ChromeVox.navigationManager.getCurrentNode();
+    var currentNode = await cvox.ChromeVox.navigationManager.getCurrentNode();
     if (!currentNode) {
       currentNode = document.body;
     }
@@ -473,7 +473,7 @@ cvox.ChromeVoxUserCommands.doCommand_ = async function(cmdStruct) {
       break;
     case 'contextMenu':
       // Move this logic to a central dispatching class if it grows any bigger.
-      var node = cvox.ChromeVox.navigationManager.getCurrentNode();
+      var node = await cvox.ChromeVox.navigationManager.getCurrentNode();
       if (node.tagName == 'SELECT' && !node.multiple) {
         new cvox.SelectWidget(node).show();
       } else {
@@ -540,12 +540,12 @@ cvox.ChromeVoxUserCommands.doCommand_ = async function(cmdStruct) {
       break;
     case 'forceClickOnCurrentItem':
       prefixMsg = Msgs.getMsg('element_clicked');
-      var targetNode = cvox.ChromeVox.navigationManager.getCurrentNode();
+      var targetNode = await cvox.ChromeVox.navigationManager.getCurrentNode();
       cvox.DomUtil.clickElem(targetNode, false, false);
       break;
     case 'forceDoubleClickOnCurrentItem':
       prefixMsg = Msgs.getMsg('element_double_clicked');
-      var targetNode = cvox.ChromeVox.navigationManager.getCurrentNode();
+      var targetNode = await cvox.ChromeVox.navigationManager.getCurrentNode();
       cvox.DomUtil.clickElem(targetNode, false, false, true);
       break;
     case 'toggleChromeVox':
@@ -611,7 +611,7 @@ cvox.ChromeVoxUserCommands.doCommand_ = async function(cmdStruct) {
     case 'speakTableLocation':
     case 'exitShifterContent':
       if (!cvox.DomPredicates.tablePredicate(cvox.DomUtil.getAncestors(
-          cvox.ChromeVox.navigationManager.getCurrentNode()))) {
+          await cvox.ChromeVox.navigationManager.getCurrentNode()))) {
         errorMsg = 'not_inside_table';
       } else if (!(await cvox.ChromeVox.navigationManager.performAction(cmd))) {
         errorMsg = 'not_in_table_mode';
@@ -699,7 +699,7 @@ cvox.ChromeVoxUserCommands.doCommand_ = async function(cmdStruct) {
       break;
 
     case 'openLongDesc':
-      var currentNode = cvox.ChromeVox.navigationManager.getCurrentNode();
+      var currentNode = await cvox.ChromeVox.navigationManager.getCurrentNode();
       if (cvox.DomUtil.hasLongDesc(currentNode)) {
         cvox.ChromeVox.host.sendToBackgroundPage({
           'target': 'OpenTab',

@@ -66,9 +66,9 @@ cvox.SelectWidget.prototype.hide = function(opt_noSync) {
  */
 cvox.SelectWidget.prototype.onNavigate = function() {
   var self = this;
-  cvox.ChromeVoxEventSuspender.withSuspendedEvents(function() {
+  cvox.ChromeVoxEventSuspender.withSuspendedEvents(async function() {
     var selectedIndex =
-        cvox.ChromeVox.navigationManager.getCurrentNode().parentNode.id;
+        await cvox.ChromeVox.navigationManager.getCurrentNode().parentNode.id;
     self.selectNode_.selectedIndex = selectedIndex;
   })();
 };

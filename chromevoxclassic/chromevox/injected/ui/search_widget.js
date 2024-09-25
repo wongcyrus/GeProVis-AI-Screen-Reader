@@ -354,7 +354,7 @@ cvox.SearchWidget.prototype.getNextResult_ = async function(searchStr) {
   do {
     if (this.getPredicate()) {
       var retNode = this.getPredicate()(cvox.DomUtil.getAncestors(
-          cvox.ChromeVox.navigationManager.getCurrentNode()));
+          await cvox.ChromeVox.navigationManager.getCurrentNode()));
       if (!retNode) {
         continue;
       }

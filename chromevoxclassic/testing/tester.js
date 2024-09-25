@@ -122,7 +122,7 @@ cvox.ChromeVoxTester.readFromHere = function() {
  * @param {Node} node The node to sync to.
  */
 cvox.ChromeVoxTester.syncToNode = async function(node) {
-  cvox.ChromeVox.navigationManager.updateSel(
+  await cvox.ChromeVox.navigationManager.updateSel(
       cvox.CursorSelection.fromNode(node));
   await cvox.ChromeVox.navigationManager.sync();
 };
@@ -131,6 +131,6 @@ cvox.ChromeVoxTester.syncToNode = async function(node) {
  * Syncs to the first node in the test.
  */
 cvox.ChromeVoxTester.syncToFirstNode = async function() {
-  cvox.ChromeVox.navigationManager.updateSel(cvox.CursorSelection.fromBody());
+  await cvox.ChromeVox.navigationManager.updateSel(cvox.CursorSelection.fromBody());
   await cvox.ChromeVox.navigationManager.sync();
 };

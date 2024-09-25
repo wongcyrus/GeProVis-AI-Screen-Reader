@@ -94,7 +94,7 @@ cvox.ChromeTts.prototype.addBridgeListener = function() {
   cvox.ExtensionBridge.addMessageListener(
       function(msg, port) {
         var message = msg['message'];
-        if (message == 'TTS_CALLBACK') {
+        if (message == 'TTS_CALLBACK') { 
           var id = msg['id'];
           var func = cvox.ChromeTts.functionMap[id];
           if (func != undefined) {

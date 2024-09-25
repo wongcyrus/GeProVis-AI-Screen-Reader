@@ -34,7 +34,7 @@ cvox.OverlayWidget.prototype.show = async function() {
 
   // Position the overlay over the current ChromeVox selection.
   var hitPoint = cvox.DomUtil.elementToPoint(
-      cvox.ChromeVox.navigationManager.getCurrentNode());
+      await cvox.ChromeVox.navigationManager.getCurrentNode());
   host.style.position = 'absolute';
   host.style.left = String(hitPoint.x);
   host.style.top = String(hitPoint.y);
@@ -69,7 +69,7 @@ cvox.OverlayWidget.prototype.onKeyDown = async function(evt) {
   // Bound navigation within the snippet for any other key.
   var r = cvox.ChromeVox.navigationManager.isReversed();
   if (!cvox.DomUtil.isDescendantOfNode(
-      cvox.ChromeVox.navigationManager.getCurrentNode(), this.host_)) {
+      await cvox.ChromeVox.navigationManager.getCurrentNode(), this.host_)) {
     if (r) {
       cvox.ChromeVox.navigationManager.syncToBeginning();
     } else {

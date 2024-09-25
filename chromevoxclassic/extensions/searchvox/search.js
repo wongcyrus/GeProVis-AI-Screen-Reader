@@ -389,8 +389,8 @@ cvox.Search.getAncestorResult = function(node) {
 /**
  * Sync to the correct initial node.
  */
-cvox.Search.initialSync = function() {
-  var currNode = cvox.ChromeVox.navigationManager.getCurrentNode();
+cvox.Search.initialSync = async function() {
+  var currNode = await cvox.ChromeVox.navigationManager.getCurrentNode();
   var result = cvox.Search.getAncestorResult(currNode);
   cvox.Search.index = cvox.Search.results.indexOf(result);
   if (cvox.Search.index === -1) {
