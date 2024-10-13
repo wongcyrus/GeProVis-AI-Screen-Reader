@@ -3,7 +3,11 @@ import os
 import base64
 import vertexai
 
-import requests
+from urllib3.util import create_urllib3_context
+from urllib3 import PoolManager
+from requests.adapters import HTTPAdapter
+from requests import Session
+# import requests
 from PIL import Image
 import io
 
@@ -30,10 +34,24 @@ REGION_RATE_LIMIT = {
     "asia-southeast1": 60,
 }
 
+class AddedCipherAdapter(HTTPAdapter):
+  def init_poolmanager(self, connections, maxsize, block=False):
+    ctx = create_urllib3_context(ciphers=":HIGH:!DH:!aNULL")
+    ctx.check_hostname = False
+    self.poolmanager = PoolManager(
+      num_pools=connections,
+      maxsize=maxsize,
+      block=block,
+      ssl_context=ctx
+    )
 
 def download_and_resize_image(url, max_size=3 * 1024 * 1024) -> str:
     # Download the image
-    response = requests.get(url)
+    # response = requests.get(url)
+    s = Session()
+    s.mount(url, AddedCipherAdapter())
+    response = s.get(url, verify=False)
+
     img = Image.open(io.BytesIO(response.content))
     hashed_url = hashlib.sha256(url.encode()).hexdigest()
     file_path = os.path.join("/tmp", hashed_url + ".png")
